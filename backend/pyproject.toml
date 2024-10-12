@@ -1,0 +1,18 @@
+[tool.poetry]
+name = "foodgram-backend"
+version = "0.1.0"
+description = "Backend for foodgram"
+authors = ["NovaHFly <mugiviska@gmail.com>"]
+license = "MIT"
+
+[tool.poetry.dependencies]
+python = "^3.9"
+django = "3.2.16"
+djangorestframework = "3.12.4"
+djoser = "2.1.0"
+djangorestframework-simplejwt = "4.7.2"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
