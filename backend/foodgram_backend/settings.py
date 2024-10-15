@@ -14,6 +14,15 @@ import os
 import sys
 from pathlib import Path
 
+from django.core.management.utils import get_random_secret_key
+
+try:
+    from dotenv import load_dotenv
+except ImportError:
+    pass
+else:
+    load_dotenv()
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -23,13 +32,14 @@ sys.path.append(str(APPS_PATH))
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.2/howto/deployment/checklist/
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-o)-9(04f9#2ith2#l0vk4l#%-d#u%ou*h7ze88o11t(h8l=&k$'
+SECRET_KEY = os.getenv('DJANGO_SECRET', get_random_secret_key())
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.getenv('DJANGO_DEBUG', 'true').lower() == 'true'
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = os.getenv(
+    'DJANGO_ALLOWED_HOSTS',
+    'localhost,127.0.0.1',
+).split(',')
 
 
 # Application definition
