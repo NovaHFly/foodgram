@@ -17,6 +17,7 @@ class Ingredient(models.Model):
     name = models.CharField(
         max_length=32,
     )
+    # TODO: Rename to measurement_unit
     unit = models.CharField(
         max_length=8,
     )
@@ -30,7 +31,9 @@ class Recipe(models.Model):
         User,
         on_delete=models.CASCADE,
     )
+    # TODO: Rename cook_time to cooking_time
     cook_time = models.IntegerField()
+    # TODO: Rename description to text
     description = models.TextField()
     image = models.ImageField(
         upload_to='recipes/images/',
@@ -42,8 +45,12 @@ class RecipeIngredient(models.Model):
     recipe = models.ForeignKey(
         Recipe,
         related_name='ingredients',
+        on_delete=models.CASCADE,
     )
-    ingredient = models.ForeignKey(Ingredient)
+    ingredient = models.ForeignKey(
+        Ingredient,
+        on_delete=models.CASCADE,
+    )
     amount = models.IntegerField()
 
 
