@@ -21,7 +21,7 @@ class TagsView(ReadOnlyModelViewSet):
 class RecipesView(ModelViewSet):
     queryset = Recipe.objects.all()
     serializer_class = RecipeSerializer
-    http_method_names = ['get', 'post', 'patch', 'delete', 'options']
+    http_method_names = ['get', 'post', 'patch', 'delete', 'head', 'options']
 
     def perform_create(self, serializer):
         serializer.save(author=User.objects.get(id=1))
