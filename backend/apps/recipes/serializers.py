@@ -49,7 +49,7 @@ class RecipeIngredientSerializer(serializers.ModelSerializer):
     def validate_id(self, data):
         if not Ingredient.objects.filter(id=data).exists():
             raise serializers.ValidationError(
-                f'Tag with id {data} does not exist!'
+                f'Ingredient with id {data} does not exist!'
             )
         return data
 
