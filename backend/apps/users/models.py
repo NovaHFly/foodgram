@@ -14,7 +14,9 @@ class UserProfile(models.Model):
         related_name='profile',
     )
     avatar = models.ImageField(
-        upload_to='users/avatars/'
+        upload_to='users/avatars/',
+        null=True,
+        blank=True,
     )
 
 
