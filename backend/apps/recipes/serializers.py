@@ -76,11 +76,14 @@ class RecipeSerializer(serializers.ModelSerializer):
 
         return tags
 
-    def create(self, validated_data):
-        recipe_ingredients = validated_data.pop('ingredients')
-        tags = validated_data.pop('tags')
+    def _write(self, validated_data, recipe=None):
+        recipe_ingredients = validated_data.pop('ingredients', [])
+        tags = validated_data.pop('tags', [])
 
-        recipe = Recipe.objects.create(**validated_data)
+        if recipe is None:
+            recipe = Recipe.objects.create(**validated_data)
+        else:
+            recipe.ingredients.all().delete()
 
         for recipe_ingredient in recipe_ingredients:
             ingredient_id = recipe_ingredient['ingredient']['id']
@@ -90,14 +93,15 @@ class RecipeSerializer(serializers.ModelSerializer):
                 amount=recipe_ingredient['amount'],
             )
 
-        tag_list = []
-
-        for tag_id in tags:
-            tag_list.append(Tag.objects.get(id=tag_id))
-
-        recipe.tags.set(tag_list)
+        recipe.tags.set(Tag.objects.get(id=tag_id) for tag_id in tags)
 
         return recipe
+
+    def create(self, validated_data):
+        return self._write(validated_data)
+
+    def update(self, instance, validated_data):
+        return self._write(validated_data, recipe=instance)
 
 
 class RecipeReadSerializer(RecipeSerializer):
