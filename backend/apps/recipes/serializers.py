@@ -57,6 +57,25 @@ class RecipeSerializer(serializers.ModelSerializer):
 
         read_only_fields = ('author',)
 
+    def validate_ingredients(self, recipe_inredients):
+        for recipe_ingredient in recipe_inredients:
+            ing_id = recipe_ingredient['ingredient']['id']
+            if not Ingredient.objects.filter(id=ing_id).exists():
+                raise serializers.ValidationError(
+                    f'Ingredient with id {ing_id} does not exist!'
+                )
+
+        return recipe_inredients
+
+    def validate_tags(self, tags):
+        for tag_id in tags:
+            if not Tag.objects.filter(id=tag_id).exists():
+                raise serializers.ValidationError(
+                    f'Tag with id {tag_id} does not exist!'
+                )
+
+        return tags
+
     def create(self, validated_data):
         recipe_ingredients = validated_data.pop('ingredients')
         tags = validated_data.pop('tags')
