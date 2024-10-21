@@ -10,7 +10,6 @@ python = "^3.9"
 django = "3.2.16"
 djangorestframework = "3.12.4"
 djoser = "2.1.0"
-djangorestframework-simplejwt = "4.7.2"
 pillow = "9.0.0"
 
 
