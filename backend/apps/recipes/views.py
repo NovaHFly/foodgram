@@ -3,7 +3,6 @@ from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
 from .models import Ingredient, Recipe, Tag, User
 from .serializers import (
     IngredientSerializer,
-    RecipeReadSerializer,
     RecipeSerializer,
     TagSerializer,
 )
@@ -22,6 +21,7 @@ class TagsView(ReadOnlyModelViewSet):
 class RecipesView(ModelViewSet):
     queryset = Recipe.objects.all()
     serializer_class = RecipeSerializer
+    http_method_names = ['get', 'post', 'patch', 'delete', 'options']
 
     def perform_create(self, serializer):
         serializer.save(author=User.objects.get(id=1))

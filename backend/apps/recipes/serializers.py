@@ -103,7 +103,3 @@ class RecipeSerializer(serializers.ModelSerializer):
 
     def update(self, instance, validated_data):
         return self._write(validated_data, recipe=instance)
-
-
-class RecipeReadSerializer(RecipeSerializer):
-    tags = TagSerializer(many=True, read_only=True)
