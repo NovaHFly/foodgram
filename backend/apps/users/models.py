@@ -14,16 +14,7 @@ class FoodgramUser(AbstractUser):
         null=True,
         blank=True,
     )
-
-
-class UserSubscription(models.Model):
-    user = models.ForeignKey(
-        FoodgramUser,
-        on_delete=models.CASCADE,
-        related_name='subscriptions',
-    )
-    subscribed_to = models.ForeignKey(
-        FoodgramUser,
-        on_delete=models.CASCADE,
+    subscriptions = models.ManyToManyField(
+        'FoodgramUser',
         related_name='subscribers',
     )
