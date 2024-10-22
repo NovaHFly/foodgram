@@ -9,7 +9,7 @@ from rest_framework.mixins import (
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet, ViewSet
 
-from .models import User
+from .models import FoodgramUser
 from .serializers import AuthSerializer, AvatarSerializer, UserSerializer
 
 
@@ -19,7 +19,7 @@ class UsersView(
     RetrieveModelMixin,
     GenericViewSet,
 ):
-    queryset = User.objects.all()
+    queryset = FoodgramUser.objects.all()
     serializer_class = UserSerializer
 
     @action(detail=False, methods=['get'])

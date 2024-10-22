@@ -1,18 +1,14 @@
-from django.contrib.auth import get_user_model
+from django.contrib.auth.models import AbstractUser
 from django.db import models
-
-User = get_user_model()
 
 # TODO: Generalize image upload path
 # TODO: Add verbose names
 
 
-class UserProfile(models.Model):
-    user = models.OneToOneField(
-        User,
-        on_delete=models.CASCADE,
-        related_name='profile',
-    )
+class FoodgramUser(AbstractUser):
+    email = models.EmailField(unique=True)
+    first_name = models.CharField(max_length=150)
+    last_name = models.CharField(max_length=150)
     avatar = models.ImageField(
         upload_to='users/avatars/',
         null=True,
@@ -22,12 +18,12 @@ class UserProfile(models.Model):
 
 class UserSubscription(models.Model):
     user = models.ForeignKey(
-        User,
+        FoodgramUser,
         on_delete=models.CASCADE,
         related_name='subscribed_to_users',
     )
     subscribed_to = models.ForeignKey(
-        User,
+        FoodgramUser,
         on_delete=models.CASCADE,
         related_name='subscribers',
     )

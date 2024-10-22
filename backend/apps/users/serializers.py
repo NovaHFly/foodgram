@@ -1,11 +1,11 @@
 from rest_framework import serializers
 
-from .models import User, UserProfile
+from .models import FoodgramUser
 
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
-        model = User
+        model = FoodgramUser
         fields = (
             'id',
             'email',
@@ -18,10 +18,9 @@ class UserSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         password = validated_data.pop('password')
-        user = User.objects.create(**validated_data)
+        user = FoodgramUser.objects.create(**validated_data)
         user.set_password(password)
         user.save()
-        UserProfile.objects.create(user=user)
         return user
 
 
@@ -31,11 +30,11 @@ class AvatarSerializer(serializers.Serializer):
 
 class AuthSerializer(serializers.ModelSerializer):
     class Meta:
-        model = User
+        model = FoodgramUser
         fields = ('email', 'password')
 
     def validate(self, attrs):
-        user = self.user = User.objects.get(email=attrs['email'])
+        user = self.user = FoodgramUser.objects.get(email=attrs['email'])
         if not user.check_password(attrs['password']):
             raise serializers.ValidationError('Invalid password!')
         return attrs
