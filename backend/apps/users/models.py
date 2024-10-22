@@ -20,7 +20,7 @@ class UserSubscription(models.Model):
     user = models.ForeignKey(
         FoodgramUser,
         on_delete=models.CASCADE,
-        related_name='subscribed_to_users',
+        related_name='subscriptions',
     )
     subscribed_to = models.ForeignKey(
         FoodgramUser,
