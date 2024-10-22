@@ -31,13 +31,15 @@ class UserProfileView(ViewSet):
 
     @action(
         detail=False,
-        methods=['put', 'delete'],
+        methods=['put'],
         url_path='me/avatar',
     )
     def avatar(self, request):
-        if request.method == 'DELETE':
-            return Response(['delete avatar'])
         return Response(['put avatar'])
+
+    @avatar.mapping.delete
+    def delete_avatar(self, request):
+        return Response(['delete avatar'])
 
     @action(detail=False, methods=['post'])
     def set_password(self, request):
