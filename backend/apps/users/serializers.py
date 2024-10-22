@@ -1,5 +1,6 @@
 import base64
 
+from django.contrib.auth.password_validation import validate_password
 from django.core.files.base import ContentFile
 from rest_framework import serializers
 
@@ -31,6 +32,10 @@ class UserSerializer(serializers.ModelSerializer):
         )
         extra_kwargs = {'password': {'write_only': True}}
         read_only_fields = ('avatar',)
+
+    def validate_password(self, data):
+        validate_password(data)
+        return data
 
     def create(self, validated_data):
         password = validated_data.pop('password')
@@ -66,3 +71,26 @@ class AuthSerializer(serializers.Serializer):
         if not user.check_password(attrs['password']):
             raise serializers.ValidationError('Invalid email or password!')
         return attrs
+
+
+class PasswordChangeSerializer(serializers.ModelSerializer):
+    new_password = serializers.CharField()
+    current_password = serializers.CharField()
+
+    class Meta:
+        model = FoodgramUser
+        fields = ('new_password', 'current_password')
+
+    def validate_current_password(self, data):
+        if not self.instance.check_password(data):
+            raise serializers.ValidationError('Invalid password!')
+        return data
+
+    def validate_new_password(self, data):
+        validate_password(data)
+        return data
+
+    def update(self, instance, validated_data):
+        instance.set_password(validated_data['new_password'])
+        instance.save()
+        return instance

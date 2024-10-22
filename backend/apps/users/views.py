@@ -11,7 +11,12 @@ from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet, ViewSet
 
 from .models import FoodgramUser
-from .serializers import AuthSerializer, AvatarSerializer, UserSerializer
+from .serializers import (
+    AuthSerializer,
+    AvatarSerializer,
+    PasswordChangeSerializer,
+    UserSerializer,
+)
 
 
 class UsersView(
@@ -48,7 +53,12 @@ class UserProfileView(ViewSet):
 
     @action(detail=False, methods=['post'])
     def set_password(self, request):
-        return Response(['set passwrod'])
+        serializer = PasswordChangeSerializer(
+            instance=request.user, data=request.data
+        )
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class AuthView(ViewSet):
