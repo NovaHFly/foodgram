@@ -1,6 +1,20 @@
+import base64
+
+from django.core.files.base import ContentFile
 from rest_framework import serializers
 
 from .models import FoodgramUser
+
+
+class Base64ImageField(serializers.ImageField):
+    def to_internal_value(self, data):
+        if isinstance(data, str) and data.startswith('data:image'):
+            format, imgstr = data.split(';base64,')
+            ext = format.split('/')[-1]
+
+            data = ContentFile(base64.b64decode(imgstr), name='temp.' + ext)
+
+        return super().to_internal_value(data)
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -13,8 +27,10 @@ class UserSerializer(serializers.ModelSerializer):
             'first_name',
             'last_name',
             'password',
+            'avatar',
         )
         extra_kwargs = {'password': {'write_only': True}}
+        read_only_fields = ('avatar',)
 
     def create(self, validated_data):
         password = validated_data.pop('password')
@@ -24,8 +40,16 @@ class UserSerializer(serializers.ModelSerializer):
         return user
 
 
-class AvatarSerializer(serializers.Serializer):
-    avatar = serializers.CharField()
+class AvatarSerializer(serializers.ModelSerializer):
+    avatar = Base64ImageField()
+
+    class Meta:
+        model = FoodgramUser
+        fields = ('avatar',)
+
+    def update(self, instance, validated_data):
+        instance.avatar.delete()
+        return super().update(instance, validated_data)
 
 
 class AuthSerializer(serializers.Serializer):

@@ -35,11 +35,16 @@ class UserProfileView(ViewSet):
         url_path='me/avatar',
     )
     def avatar(self, request):
-        return Response(['put avatar'])
+        serializer = AvatarSerializer(instance=request.user, data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+
+        return Response(serializer.data)
 
     @avatar.mapping.delete
     def delete_avatar(self, request):
-        return Response(['delete avatar'])
+        request.user.avatar.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
     @action(detail=False, methods=['post'])
     def set_password(self, request):
