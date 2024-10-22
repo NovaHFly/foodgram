@@ -6,6 +6,7 @@ from rest_framework.mixins import (
     ListModelMixin,
     RetrieveModelMixin,
 )
+from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet, ViewSet
 
@@ -22,6 +23,8 @@ class UsersView(
     queryset = FoodgramUser.objects.all()
     serializer_class = UserSerializer
 
+
+class UserProfileView(ViewSet):
     @action(detail=False, methods=['get'])
     def me(self, request):
         return Response(UserSerializer(request.user).data)
@@ -42,7 +45,7 @@ class UsersView(
 
 
 class AuthView(ViewSet):
-    @action(detail=False, methods=['post'])
+    @action(detail=False, methods=['post'], permission_classes=[AllowAny])
     def login(self, request):
         serializer = AuthSerializer(data=request.data)
         if serializer.is_valid(raise_exception=True):
