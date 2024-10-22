@@ -19,6 +19,8 @@ class Base64ImageField(serializers.ImageField):
 
 
 class UserSerializer(serializers.ModelSerializer):
+    is_subscribed = serializers.SerializerMethodField()
+
     class Meta:
         model = FoodgramUser
         fields = (
@@ -29,9 +31,16 @@ class UserSerializer(serializers.ModelSerializer):
             'last_name',
             'password',
             'avatar',
+            'is_subscribed',
         )
         extra_kwargs = {'password': {'write_only': True}}
         read_only_fields = ('avatar',)
+
+    def get_is_subscribed(self, obj):
+        if request := self.context.get('request', None):
+            current_user = request.user
+            return obj in current_user.subscriptions.all()
+        return None
 
     def validate_password(self, data):
         validate_password(data)
