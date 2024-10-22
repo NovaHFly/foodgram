@@ -94,6 +94,7 @@ class RecipeSerializer(serializers.ModelSerializer):
     def _write(self, validated_data, recipe=None):
         recipe_ingredients = validated_data.pop('ingredients', [])
         tags = validated_data.pop('tags', [])
+        image = validated_data.pop('image', None)
 
         if recipe is None:
             recipe = Recipe.objects.create(**validated_data)
@@ -109,12 +110,15 @@ class RecipeSerializer(serializers.ModelSerializer):
                 amount=recipe_ingredient['amount'],
             )
 
-        if 'image' in validated_data and recipe.image:
-            recipe.image.delete()
-
         if tags:
             recipe.tags.set(Tag.objects.get(id=tag['id']) for tag in tags)
 
+        if image:
+            if recipe.image:
+                recipe.image.delete()
+            recipe.image = image
+
+        recipe.save()
         return recipe
 
     def create(self, validated_data):
