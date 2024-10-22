@@ -12,6 +12,7 @@ preview = true
 
 [lint.isort]
 combine-as-imports = true
+known-first-party = ["recipes", "users", "api"]
 
 [lint.flake8-quotes]
 inline-quotes = "single"
