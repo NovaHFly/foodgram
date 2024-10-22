@@ -1,3 +1,4 @@
+from django.shortcuts import get_object_or_404
 from rest_framework import status
 from rest_framework.authtoken.models import Token
 from rest_framework.decorators import action
@@ -7,6 +8,7 @@ from rest_framework.mixins import (
     RetrieveModelMixin,
 )
 from rest_framework.permissions import AllowAny
+from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet, ViewSet
 
@@ -74,4 +76,45 @@ class AuthView(ViewSet):
     def logout(self, request):
         user = request.user
         Token.objects.filter(user=user).delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class SubscriptionView(ViewSet):
+    @action(detail=False, methods=['get'])
+    def subscriptions(self, request):
+        return Response(
+            UserSerializer(
+                request.user.subscriptions.all(),
+                many=True,
+            ).data
+        )
+
+    @action(detail=True, methods=['post'])
+    def subscribe(self, request: Request, pk: int):
+        user_to_subscribe = get_object_or_404(FoodgramUser, id=pk)
+        current_user = request.user
+
+        if current_user == user_to_subscribe:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+
+        if user_to_subscribe in current_user.subscriptions.all():
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+
+        current_user.subscriptions.add(user_to_subscribe)
+
+        return Response(
+            UserSerializer(user_to_subscribe).data,
+            status=status.HTTP_201_CREATED,
+        )
+
+    @subscribe.mapping.delete
+    def unsubscribe(self, request: Request, pk: int):
+        current_user = request.user
+        user_to_unsubscribe = get_object_or_404(FoodgramUser, id=pk)
+
+        if user_to_unsubscribe not in current_user.subscriptions.all():
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+
+        current_user.subscriptions.remove(user_to_unsubscribe)
+
         return Response(status=status.HTTP_204_NO_CONTENT)
