@@ -28,13 +28,17 @@ class AvatarSerializer(serializers.Serializer):
     avatar = serializers.CharField()
 
 
-class AuthSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = FoodgramUser
-        fields = ('email', 'password')
+class AuthSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+    password = serializers.CharField()
+
+    def validate_email(self, data):
+        if not FoodgramUser.objects.filter(email=data).exists():
+            raise serializers.ValidationError('Invalid email or password!')
+        return data
 
     def validate(self, attrs):
         user = self.user = FoodgramUser.objects.get(email=attrs['email'])
         if not user.check_password(attrs['password']):
-            raise serializers.ValidationError('Invalid password!')
+            raise serializers.ValidationError('Invalid email or password!')
         return attrs
