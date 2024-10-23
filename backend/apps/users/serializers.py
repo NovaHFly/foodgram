@@ -56,6 +56,27 @@ class UserSerializer(serializers.ModelSerializer):
         return user
 
 
+class AuthoredRecipeSerializer(serializers.Serializer):
+    id = serializers.IntegerField()
+    name = serializers.CharField()
+    image = Base64ImageField()
+    cooking_time = serializers.IntegerField()
+
+
+class SubscriptionUserSerializer(UserSerializer):
+    recipes = AuthoredRecipeSerializer(many=True)
+    recipe_count = serializers.SerializerMethodField()
+
+    class Meta(UserSerializer.Meta):
+        fields = UserSerializer.Meta.fields + (
+            'recipes',
+            'recipe_count',
+        )
+
+    def get_recipe_count(self, obj):
+        return obj.recipes.count()
+
+
 class AvatarSerializer(serializers.ModelSerializer):
     avatar = Base64ImageField()
 

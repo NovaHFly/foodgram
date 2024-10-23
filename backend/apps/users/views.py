@@ -17,6 +17,7 @@ from .serializers import (
     AuthSerializer,
     AvatarSerializer,
     PasswordChangeSerializer,
+    SubscriptionUserSerializer,
     UserSerializer,
 )
 
@@ -93,7 +94,7 @@ class SubscriptionView(GenericViewSet):
     @action(detail=False, methods=['get'])
     def subscriptions(self, request):
         return Response(
-            UserSerializer(
+            SubscriptionUserSerializer(
                 request.user.subscriptions.all(),
                 many=True,
                 context=self.get_serializer_context(),
@@ -114,7 +115,7 @@ class SubscriptionView(GenericViewSet):
         current_user.subscriptions.add(user_to_subscribe)
 
         return Response(
-            UserSerializer(
+            SubscriptionUserSerializer(
                 user_to_subscribe,
                 context=self.get_serializer_context(),
             ).data,
