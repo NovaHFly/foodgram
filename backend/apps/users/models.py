@@ -18,3 +18,6 @@ class FoodgramUser(AbstractUser):
         'FoodgramUser',
         related_name='subscribers',
     )
+
+    def __str__(self) -> str:
+        return f'{self.username} [{self.email}]'

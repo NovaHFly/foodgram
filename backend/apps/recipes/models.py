@@ -13,14 +13,21 @@ class Tag(models.Model):
     name = models.CharField(max_length=32, unique=True)
     slug = models.SlugField(unique=True)
 
+    def __str__(self) -> str:
+        return f'#{self.slug}'
+
 
 class Ingredient(models.Model):
     name = models.CharField(
         max_length=32,
+        unique=True,
     )
     measurement_unit = models.CharField(
         max_length=8,
     )
+
+    def __str__(self) -> str:
+        return self.name
 
 
 class Recipe(models.Model):
@@ -46,6 +53,9 @@ class Recipe(models.Model):
         User, related_name='favorited_recipes'
     )
 
+    def __str__(self) -> str:
+        return f'{self.name} - {self.author}'
+
 
 class RecipeIngredient(models.Model):
     recipe = models.ForeignKey(
@@ -60,6 +70,9 @@ class RecipeIngredient(models.Model):
     )
     amount = models.IntegerField()
 
+    def __str__(self) -> str:
+        return f'[{self.recipe.name}] <-> [{self.ingredient.name}]'
+
 
 class ShoppingCart(models.Model):
     user = AutoOneToOneField(
@@ -69,7 +82,13 @@ class ShoppingCart(models.Model):
     )
     recipes = models.ManyToManyField(Recipe)
 
+    def __str__(self) -> str:
+        return f'Список покупок {self.user}'
+
 
 class ShortLink(models.Model):
     full_url = models.URLField(max_length=200, unique=True)
     short_url = models.CharField(max_length=32, unique=True)
+
+    def __str__(self) -> str:
+        return f'{self.short_url} -> {self.full_url}'
