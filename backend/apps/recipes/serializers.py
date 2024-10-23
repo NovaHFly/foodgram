@@ -73,6 +73,7 @@ class RecipeSerializer(serializers.ModelSerializer):
         source='recipe_to_ingredient',
     )
     image = Base64ImageField()
+    is_favorited = serializers.SerializerMethodField()
 
     class Meta:
         model = Recipe
@@ -80,6 +81,7 @@ class RecipeSerializer(serializers.ModelSerializer):
             'id',
             'tags',
             'ingredients',
+            'is_favorited',
             'name',
             'author',
             'image',
@@ -88,6 +90,14 @@ class RecipeSerializer(serializers.ModelSerializer):
         )
 
         read_only_fields = ('author',)
+
+    def get_is_favorited(self, obj):
+        if request := self.context.get('request', None):
+            current_user = request.user
+            if current_user.is_anonymous:
+                return False
+            return obj in current_user.favorited_recipes.all()
+        return False
 
     def _write(self, validated_data, recipe=None):
         recipe_ingredients = validated_data.pop('recipe_to_ingredient', [])
