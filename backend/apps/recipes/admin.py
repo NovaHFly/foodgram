@@ -1,6 +1,11 @@
 from django.contrib import admin
 
-from .models import Ingredient, Recipe, Tag
+from .models import Ingredient, Recipe, RecipeIngredient, Tag
+
+
+class RecipeIngredientInline(admin.StackedInline):
+    model = RecipeIngredient
+    extra = 0
 
 
 @admin.register(Ingredient)
@@ -34,3 +39,4 @@ class RecipeAdmin(admin.ModelAdmin):
     )
     list_display_links = ('id', 'name')
     search_fields = ('name', 'author')
+    inlines = (RecipeIngredientInline,)
