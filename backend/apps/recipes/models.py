@@ -58,3 +58,8 @@ class RecipeIngredient(models.Model):
         related_name='ingredient_to_recipe',
     )
     amount = models.IntegerField()
+
+
+class ShortLink(models.Model):
+    full_url = models.URLField(max_length=200, unique=True)
+    short_url = models.CharField(max_length=32, unique=True)

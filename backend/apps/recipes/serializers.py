@@ -3,7 +3,8 @@ import base64
 from django.core.files.base import ContentFile
 from rest_framework import serializers
 
-from .models import Ingredient, Recipe, RecipeIngredient, Tag
+from .models import Ingredient, Recipe, RecipeIngredient, ShortLink, Tag
+from .util import generate_short_url
 
 
 class Base64ImageField(serializers.ImageField):
@@ -138,3 +139,27 @@ class RecipeSerializer(serializers.ModelSerializer):
 
     def update(self, instance, validated_data):
         return self._write(validated_data, recipe=instance)
+
+
+class ShortLinkSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ShortLink
+        fields = ('id', 'full_url')
+
+    def to_representation(self, instance):
+        host_with_schema = self.context['request'].get_raw_uri().partition('/api/')[0]
+        return {'short-link': f'{host_with_schema}/s/{instance.short_url}'}
+
+    def create(self, validated_data):
+        full_url = validated_data['full_url']
+        while True:
+            short_url = generate_short_url()
+            if not ShortLink.objects.filter(short_url=short_url).exists():
+                break
+
+        short_link, _ = ShortLink.objects.get_or_create(
+            full_url=full_url,
+            short_url=short_url,
+        )
+
+        return short_link

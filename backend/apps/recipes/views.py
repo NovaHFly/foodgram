@@ -1,15 +1,18 @@
+from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404
 from rest_framework import status
-from rest_framework.decorators import action
+from rest_framework.decorators import action, api_view
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
 
-from .models import Ingredient, Recipe, Tag
+from .models import Ingredient, Recipe, ShortLink, Tag
 from .permissions import IsAuthorOrReadOnly
 from .serializers import (
     IngredientSerializer,
     RecipeSerializer,
+    ShortLinkSerializer,
     TagSerializer,
 )
 
@@ -41,7 +44,7 @@ class RecipesView(ModelViewSet):
         permission_classes=[IsAuthenticated],
     )
     def favorite(self, request, pk: int):
-        recipe = get_object_or_404(Recipe, id=pk)
+        recipe = self.get_object()
         user = request.user
 
         if recipe in user.favorited_recipes.all():
@@ -57,7 +60,7 @@ class RecipesView(ModelViewSet):
 
     @favorite.mapping.delete
     def unfavorite(self, request, pk: int):
-        recipe = get_object_or_404(Recipe, id=pk)
+        recipe = self.get_object()
         user = request.user
 
         if recipe not in user.favorited_recipes.all():
@@ -65,3 +68,21 @@ class RecipesView(ModelViewSet):
 
         user.favorited_recipes.remove(recipe)
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+    @action(detail=True, methods=['get'])
+    def get_link(self, request, pk: int):
+        self.get_object()
+        full_url = request.get_raw_uri().removesuffix('get_link/')
+        serializer = ShortLinkSerializer(
+            data={'full_url': full_url},
+            context=self.get_serializer_context(),
+        )
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data)
+
+
+@api_view(['get'])
+def unshorten_link(request, short_url):
+    full_url = get_object_or_404(ShortLink, short_url=short_url).full_url
+    return HttpResponseRedirect(full_url)

@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Ingredient, Recipe, RecipeIngredient, Tag
+from .models import Ingredient, Recipe, RecipeIngredient, ShortLink, Tag
 
 
 class RecipeIngredientInline(admin.StackedInline):
@@ -40,3 +40,9 @@ class RecipeAdmin(admin.ModelAdmin):
     list_display_links = ('id', 'name')
     search_fields = ('name', 'author')
     inlines = (RecipeIngredientInline,)
+
+
+@admin.register(ShortLink)
+class ShortLinkAdmin(admin.ModelAdmin):
+    list_display = ('id', 'short_url', 'full_url')
+    list_display_links = ('id', 'short_url')

@@ -1,6 +1,12 @@
+from django.urls import include, path
 from rest_framework.routers import DefaultRouter
 
-from recipes.views import IngredientsView, RecipesView, TagsView
+from recipes.views import (
+    IngredientsView,
+    RecipesView,
+    TagsView,
+    unshorten_link,
+)
 from users.views import AuthView, SubscriptionView, UserProfileView, UsersView
 
 router = DefaultRouter()
@@ -13,4 +19,7 @@ router.register('users', UserProfileView, basename='user_profile')
 router.register('users', UsersView, basename='users')
 
 
-urlpatterns = router.urls
+urlpatterns = [
+    path('api/', include(router.urls)),
+    path('s/<str:short_url>/', unshorten_link, name='unshorten_link'),
+]
