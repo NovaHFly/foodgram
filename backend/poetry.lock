@@ -333,6 +333,20 @@ argon2 = ["argon2-cffi (>=19.1.0)"]
 bcrypt = ["bcrypt"]
 
 [[package]]
+name = "django-annoying"
+version = "0.10.7"
+description = "This is a django application that tries to eliminate annoying things in the Django framework."
+optional = false
+python-versions = ">=3.0"
+files = [
+    {file = "django-annoying-0.10.7.tar.gz", hash = "sha256:d42a9f4757701903edcb3398c542e6d39e67856295059589296c277350d02fc0"},
+]
+
+[package.dependencies]
+Django = ">=1.11"
+six = "*"
+
+[[package]]
 name = "django-templated-mail"
 version = "1.1.1"
 description = "Send emails using Django template system."
@@ -790,4 +804,4 @@ zstd = ["zstandard (>=0.18.0)"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.9"
-content-hash = "af4cd320dc2055b04a8cd68cc59f2eeb070c553c020c96c6f39aade6a6696ea2"
+content-hash = "393400b68c41e4ab1c6f3de8d9b4c1213538a757812b8ed1d7a9a7157793774c"
