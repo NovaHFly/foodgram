@@ -9,8 +9,8 @@ User = get_user_model()
 
 
 class Tag(models.Model):
-    name = models.CharField(max_length=32)
-    slug = models.SlugField()
+    name = models.CharField(max_length=32, unique=True)
+    slug = models.SlugField(unique=True)
 
 
 class Ingredient(models.Model):
