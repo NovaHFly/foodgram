@@ -40,6 +40,9 @@ class Recipe(models.Model):
         Ingredient,
         through='RecipeIngredient',
     )
+    favorited_by_users = models.ManyToManyField(
+        User, related_name='favorited_recipes'
+    )
 
 
 class RecipeIngredient(models.Model):
@@ -54,15 +57,3 @@ class RecipeIngredient(models.Model):
         related_name='ingredient_to_recipe',
     )
     amount = models.IntegerField()
-
-
-class FavoriteRecipe(models.Model):
-    user = models.ForeignKey(
-        User,
-        on_delete=models.CASCADE,
-        related_name='favorite_recipes',
-    )
-    recipe = models.ForeignKey(
-        Recipe,
-        on_delete=models.CASCADE,
-    )
