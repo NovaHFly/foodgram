@@ -1,21 +1,9 @@
-import base64
-
-from django.core.files.base import ContentFile
 from rest_framework import serializers
 
+from common.serializers import Base64ImageField
+from common.util import generate_token
+
 from .models import Ingredient, Recipe, RecipeIngredient, ShortLink, Tag
-from .util import generate_short_url
-
-
-class Base64ImageField(serializers.ImageField):
-    def to_internal_value(self, data):
-        if isinstance(data, str) and data.startswith('data:image'):
-            format, imgstr = data.split(';base64,')
-            ext = format.split('/')[-1]
-
-            data = ContentFile(base64.b64decode(imgstr), name='temp.' + ext)
-
-        return super().to_internal_value(data)
 
 
 class TagSerializer(serializers.ModelSerializer):
@@ -166,7 +154,7 @@ class ShortLinkSerializer(serializers.ModelSerializer):
         )
         full_url = f'{host_with_schema}/recipes/{validated_data["recipe_id"]}/'
         while True:
-            short_url = generate_short_url()
+            short_url = generate_token()
             if not ShortLink.objects.filter(short_url=short_url).exists():
                 break
 

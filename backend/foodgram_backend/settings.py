@@ -55,6 +55,7 @@ INSTALLED_APPS = [
     'annoying',
     'rest_framework',
     'rest_framework.authtoken',
+    'common',
     'users',
     'recipes',
     'api',
