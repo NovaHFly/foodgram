@@ -96,6 +96,9 @@ class RecipeSerializer(serializers.ModelSerializer):
 
         if recipe is None:
             recipe = Recipe.objects.create(**validated_data)
+        else:
+            for key, value in validated_data.items():
+                setattr(recipe, key, value)
 
         if recipe_ingredients:
             recipe.ingredients.clear()
