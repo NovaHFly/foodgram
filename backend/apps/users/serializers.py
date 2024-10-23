@@ -4,6 +4,8 @@ from django.contrib.auth.password_validation import validate_password
 from django.core.files.base import ContentFile
 from rest_framework import serializers
 
+from recipes.serializers import ShortRecipeSerializer
+
 from .models import FoodgramUser
 
 
@@ -56,15 +58,8 @@ class UserSerializer(serializers.ModelSerializer):
         return user
 
 
-class AuthoredRecipeSerializer(serializers.Serializer):
-    id = serializers.IntegerField()
-    name = serializers.CharField()
-    image = Base64ImageField()
-    cooking_time = serializers.IntegerField()
-
-
 class SubscriptionUserSerializer(UserSerializer):
-    recipes = AuthoredRecipeSerializer(many=True)
+    recipes = ShortRecipeSerializer(many=True)
     recipe_count = serializers.SerializerMethodField()
 
     class Meta(UserSerializer.Meta):

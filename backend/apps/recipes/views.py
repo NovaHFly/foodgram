@@ -13,6 +13,7 @@ from .serializers import (
     IngredientSerializer,
     RecipeSerializer,
     ShortLinkSerializer,
+    ShortRecipeSerializer,
     TagSerializer,
 )
 
@@ -81,6 +82,34 @@ class RecipesView(ModelViewSet):
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(serializer.data)
+
+    @action(
+        detail=True,
+        methods=['post'],
+        permission_classes=[IsAuthenticated],
+    )
+    def shopping_cart(self, request, pk: int):
+        recipe = self.get_object()
+        current_user = request.user
+
+        if recipe in current_user.shopping_cart.recipes.all():
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+
+        current_user.shopping_cart.recipes.add(recipe)
+        return Response(
+            ShortRecipeSerializer(recipe).data, status=status.HTTP_201_CREATED
+        )
+
+    @shopping_cart.mapping.delete
+    def remove_from_shopping_cart(self, request, pk: int):
+        recipe = self.get_object()
+        current_user = request.user
+
+        if recipe not in current_user.shopping_cart.recipes.all():
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+
+        current_user.shopping_cart.recipes.remove(recipe)
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 @api_view(['get'])
