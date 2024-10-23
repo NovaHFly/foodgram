@@ -7,7 +7,7 @@ from rest_framework.mixins import (
     ListModelMixin,
     RetrieveModelMixin,
 )
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet, ViewSet
@@ -32,9 +32,11 @@ class UsersView(
     serializer_class = UserSerializer
     permission_classes = [AllowAny]
 
-
-class UserProfileView(GenericViewSet):
-    @action(detail=False, methods=['get'])
+    @action(
+        detail=False,
+        methods=['get'],
+        permission_classes=[IsAuthenticated],
+    )
     def me(self, request):
         return Response(
             UserSerializer(
@@ -47,6 +49,7 @@ class UserProfileView(GenericViewSet):
         detail=False,
         methods=['put'],
         url_path='me/avatar',
+        permission_classes=[IsAuthenticated],
     )
     def avatar(self, request):
         serializer = AvatarSerializer(
@@ -64,7 +67,11 @@ class UserProfileView(GenericViewSet):
         request.user.avatar.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-    @action(detail=False, methods=['post'])
+    @action(
+        detail=False,
+        methods=['post'],
+        permission_classes=[IsAuthenticated],
+    )
     def set_password(self, request):
         serializer = PasswordChangeSerializer(
             instance=request.user, data=request.data
@@ -73,25 +80,11 @@ class UserProfileView(GenericViewSet):
         serializer.save()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-
-class AuthView(ViewSet):
-    @action(detail=False, methods=['post'], permission_classes=[AllowAny])
-    def login(self, request):
-        serializer = AuthSerializer(data=request.data)
-        if serializer.is_valid(raise_exception=True):
-            user = serializer.user
-            token, _ = Token.objects.get_or_create(user=user)
-            return Response({'auth_token': token.key})
-
-    @action(detail=False, methods=['post'])
-    def logout(self, request):
-        user = request.user
-        Token.objects.filter(user=user).delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
-
-
-class SubscriptionView(GenericViewSet):
-    @action(detail=False, methods=['get'])
+    @action(
+        detail=False,
+        methods=['get'],
+        permission_classes=[IsAuthenticated],
+    )
     def subscriptions(self, request):
         return Response(
             SubscriptionUserSerializer(
@@ -101,7 +94,11 @@ class SubscriptionView(GenericViewSet):
             ).data
         )
 
-    @action(detail=True, methods=['post'])
+    @action(
+        detail=True,
+        methods=['post'],
+        permission_classes=[IsAuthenticated],
+    )
     def subscribe(self, request: Request, pk: int):
         user_to_subscribe = get_object_or_404(FoodgramUser, id=pk)
         current_user = request.user
@@ -132,4 +129,27 @@ class SubscriptionView(GenericViewSet):
 
         current_user.subscriptions.remove(user_to_unsubscribe)
 
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class AuthView(ViewSet):
+    @action(
+        detail=False,
+        methods=['post'],
+        permission_classes=[AllowAny],
+    )
+    def login(self, request):
+        serializer = AuthSerializer(data=request.data)
+        if serializer.is_valid(raise_exception=True):
+            user = serializer.user
+            token, _ = Token.objects.get_or_create(user=user)
+            return Response({'auth_token': token.key})
+
+    @action(
+        detail=False,
+        methods=['post'],
+    )
+    def logout(self, request):
+        user = request.user
+        Token.objects.filter(user=user).delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
