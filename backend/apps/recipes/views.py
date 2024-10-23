@@ -25,12 +25,14 @@ class IngredientsView(ReadOnlyModelViewSet):
     queryset = Ingredient.objects.all()
     serializer_class = IngredientSerializer
     permission_classes = [IsAuthorOrReadOnly]
+    pagination_class = None
 
 
 class TagsView(ReadOnlyModelViewSet):
     queryset = Tag.objects.all()
     serializer_class = TagSerializer
     permission_classes = [IsAuthorOrReadOnly]
+    pagination_class = None
 
 
 class RecipesView(ModelViewSet):
@@ -96,8 +98,9 @@ class RecipesView(ModelViewSet):
         detail=True,
         methods=['post'],
         permission_classes=[IsAuthenticated],
+        url_path='shopping_cart',
     )
-    def shopping_cart(self, request, pk: int):
+    def add_to_shopping_cart(self, request, pk: int):
         recipe = self.get_object()
         current_user = request.user
 
@@ -106,10 +109,14 @@ class RecipesView(ModelViewSet):
 
         current_user.shopping_cart.recipes.add(recipe)
         return Response(
-            ShortRecipeSerializer(recipe).data, status=status.HTTP_201_CREATED
+            ShortRecipeSerializer(
+                recipe,
+                context=self.get_serializer_context(),
+            ).data,
+            status=status.HTTP_201_CREATED,
         )
 
-    @shopping_cart.mapping.delete
+    @add_to_shopping_cart.mapping.delete
     def remove_from_shopping_cart(self, request, pk: int):
         recipe = self.get_object()
         current_user = request.user

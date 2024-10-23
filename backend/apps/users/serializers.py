@@ -46,7 +46,7 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class SubscriptionUserSerializer(UserSerializer):
-    recipes = ShortRecipeSerializer(many=True)
+    recipes = serializers.SerializerMethodField()
     recipe_count = serializers.SerializerMethodField()
 
     class Meta(UserSerializer.Meta):
@@ -57,6 +57,25 @@ class SubscriptionUserSerializer(UserSerializer):
 
     def get_recipe_count(self, obj):
         return obj.recipes.count()
+
+    def get_recipes(self, obj):
+        request = self.context['request']
+        recipes = obj.recipes.all()
+
+        data = ShortRecipeSerializer(
+            recipes,
+            many=True,
+            context=self.context,
+        ).data
+
+        if (
+            'recipes_limit' in request.query_params
+            and request.query_params['recipes_limit'].isdigit()
+        ):
+            limit = int(request.query_params['recipes_limit'])
+            data = data[:limit]
+
+        return data
 
 
 class AvatarSerializer(serializers.ModelSerializer):

@@ -1,4 +1,3 @@
-from django.shortcuts import get_object_or_404
 from rest_framework import status
 from rest_framework.authtoken.models import Token
 from rest_framework.decorators import action
@@ -86,13 +85,14 @@ class UsersView(
         permission_classes=[IsAuthenticated],
     )
     def subscriptions(self, request):
-        return Response(
+        paginated_data = self.paginate_queryset(
             SubscriptionUserSerializer(
                 request.user.subscriptions.all(),
                 many=True,
                 context=self.get_serializer_context(),
             ).data
         )
+        return self.get_paginated_response(paginated_data)
 
     @action(
         detail=True,
@@ -100,7 +100,7 @@ class UsersView(
         permission_classes=[IsAuthenticated],
     )
     def subscribe(self, request: Request, pk: int):
-        user_to_subscribe = get_object_or_404(FoodgramUser, id=pk)
+        user_to_subscribe = self.get_object()
         current_user = request.user
 
         if current_user == user_to_subscribe:
@@ -122,7 +122,7 @@ class UsersView(
     @subscribe.mapping.delete
     def unsubscribe(self, request: Request, pk: int):
         current_user = request.user
-        user_to_unsubscribe = get_object_or_404(FoodgramUser, id=pk)
+        user_to_unsubscribe = self.get_object()
 
         if user_to_unsubscribe not in current_user.subscriptions.all():
             return Response(status=status.HTTP_400_BAD_REQUEST)
