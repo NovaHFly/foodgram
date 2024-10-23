@@ -16,6 +16,7 @@ from .serializers import (
     ShortRecipeSerializer,
     TagSerializer,
 )
+from .util import generate_shopping_cart
 
 # TODO: Remove duplicate code
 
@@ -82,6 +83,14 @@ class RecipesView(ModelViewSet):
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(serializer.data)
+
+    @action(detail=False, methods=['get'])
+    def download_shopping_cart(self, request):
+        recipes = request.user.shopping_cart.recipes.all()
+        return Response(
+            generate_shopping_cart(recipes),
+            content_type='text/plain charset=utf-8',
+        )
 
     @action(
         detail=True,
