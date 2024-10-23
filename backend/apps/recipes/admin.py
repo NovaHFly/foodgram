@@ -8,7 +8,7 @@ class IngredientAdmin(admin.ModelAdmin):
     list_display = (
         'id',
         'name',
-        'unit',
+        'measurement_unit',
     )
     list_display_links = ('id', 'name')
     search_fields = ('name',)

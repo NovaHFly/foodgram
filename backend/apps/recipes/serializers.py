@@ -38,8 +38,6 @@ class TagSerializer(serializers.ModelSerializer):
 
 
 class IngredientSerializer(serializers.ModelSerializer):
-    measurement_unit = serializers.CharField(source='unit')
-
     class Meta:
         model = Ingredient
         fields = ('id', 'name', 'measurement_unit')
@@ -52,7 +50,7 @@ class RecipeIngredientSerializer(serializers.ModelSerializer):
         read_only=True,
     )
     measurement_unit = serializers.CharField(
-        source='ingredient.unit',
+        source='ingredient.measurement_unit',
         read_only=True,
     )
 
@@ -72,9 +70,6 @@ class RecipeSerializer(serializers.ModelSerializer):
     tags = TagSerializer(many=True)
     ingredients = RecipeIngredientSerializer(many=True)
     image = Base64ImageField()
-
-    cooking_time = serializers.IntegerField(source='cook_time')
-    text = serializers.CharField(source='description')
 
     class Meta:
         model = Recipe
