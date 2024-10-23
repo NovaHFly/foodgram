@@ -29,6 +29,7 @@ class Recipe(models.Model):
     author = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
+        related_name='recipes',
     )
     cooking_time = models.IntegerField()
     text = models.TextField()
