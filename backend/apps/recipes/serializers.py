@@ -68,7 +68,10 @@ class RecipeIngredientSerializer(serializers.ModelSerializer):
 
 class RecipeSerializer(serializers.ModelSerializer):
     tags = TagSerializer(many=True)
-    ingredients = RecipeIngredientSerializer(many=True)
+    ingredients = RecipeIngredientSerializer(
+        many=True,
+        source='recipe_to_ingredient',
+    )
     image = Base64ImageField()
 
     class Meta:
@@ -87,7 +90,7 @@ class RecipeSerializer(serializers.ModelSerializer):
         read_only_fields = ('author',)
 
     def _write(self, validated_data, recipe=None):
-        recipe_ingredients = validated_data.pop('ingredients', [])
+        recipe_ingredients = validated_data.pop('recipe_to_ingredient', [])
         tags = validated_data.pop('tags', [])
         image = validated_data.pop('image', None)
 
@@ -95,14 +98,15 @@ class RecipeSerializer(serializers.ModelSerializer):
             recipe = Recipe.objects.create(**validated_data)
 
         if recipe_ingredients:
-            recipe.ingredients.all().delete()
+            recipe.ingredients.clear()
 
         for recipe_ingredient in recipe_ingredients:
-            ingredient_id = recipe_ingredient['ingredient']['id']
-            RecipeIngredient.objects.create(
-                recipe=recipe,
-                ingredient=Ingredient.objects.get(id=ingredient_id),
-                amount=recipe_ingredient['amount'],
+            ingredient = Ingredient.objects.get(
+                id=recipe_ingredient['ingredient']['id']
+            )
+            recipe.ingredients.add(
+                ingredient,
+                through_defaults={'amount': recipe_ingredient['amount']},
             )
 
         if tags:
