@@ -142,16 +142,23 @@ class RecipeSerializer(serializers.ModelSerializer):
 
 
 class ShortLinkSerializer(serializers.ModelSerializer):
+    recipe_id = serializers.IntegerField()
+
     class Meta:
         model = ShortLink
-        fields = ('id', 'full_url')
+        fields = ('id', 'recipe_id')
 
     def to_representation(self, instance):
-        host_with_schema = self.context['request'].get_raw_uri().partition('/api/')[0]
+        host_with_schema = (
+            self.context['request'].get_raw_uri().partition('/api/')[0]
+        )
         return {'short-link': f'{host_with_schema}/s/{instance.short_url}'}
 
     def create(self, validated_data):
-        full_url = validated_data['full_url']
+        host_with_schema = (
+            self.context['request'].get_raw_uri().partition('/api/')[0]
+        )
+        full_url = f'{host_with_schema}/recipes/{validated_data["recipe_id"]}/'
         while True:
             short_url = generate_short_url()
             if not ShortLink.objects.filter(short_url=short_url).exists():

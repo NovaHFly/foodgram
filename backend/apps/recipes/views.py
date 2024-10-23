@@ -16,6 +16,8 @@ from .serializers import (
     TagSerializer,
 )
 
+# TODO: Remove duplicate code
+
 
 class IngredientsView(ReadOnlyModelViewSet):
     queryset = Ingredient.objects.all()
@@ -72,9 +74,8 @@ class RecipesView(ModelViewSet):
     @action(detail=True, methods=['get'])
     def get_link(self, request, pk: int):
         self.get_object()
-        full_url = request.get_raw_uri().removesuffix('get_link/')
         serializer = ShortLinkSerializer(
-            data={'full_url': full_url},
+            data={'recipe_id': pk},
             context=self.get_serializer_context(),
         )
         serializer.is_valid(raise_exception=True)
