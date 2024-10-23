@@ -58,7 +58,7 @@ class RecipesView(ModelViewSet):
 
         user.favorited_recipes.add(recipe)
         return Response(
-            RecipeSerializer(
+            ShortRecipeSerializer(
                 recipe,
                 context=self.get_serializer_context(),
             ).data

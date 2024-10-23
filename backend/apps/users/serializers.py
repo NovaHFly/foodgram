@@ -2,7 +2,7 @@ from django.contrib.auth.password_validation import validate_password
 from rest_framework import serializers
 
 from common.serializers import Base64ImageField
-from recipes.serializers import ShortRecipeSerializer
+from recipes import serializers as recipes_serializers
 
 from .models import FoodgramUser
 
@@ -62,7 +62,7 @@ class SubscriptionUserSerializer(UserSerializer):
         request = self.context['request']
         recipes = obj.recipes.all()
 
-        data = ShortRecipeSerializer(
+        data = recipes_serializers.ShortRecipeSerializer(
             recipes,
             many=True,
             context=self.context,

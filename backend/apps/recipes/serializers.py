@@ -2,6 +2,7 @@ from rest_framework import serializers
 
 from common.serializers import Base64ImageField
 from common.util import generate_token
+from users import serializers as users_serializers
 
 from .models import Ingredient, Recipe, RecipeIngredient, ShortLink, Tag
 
@@ -69,6 +70,7 @@ class RecipeSerializer(serializers.ModelSerializer):
     )
     image = Base64ImageField()
     is_favorited = serializers.SerializerMethodField()
+    author = users_serializers.UserSerializer(read_only=True)
 
     class Meta:
         model = Recipe
