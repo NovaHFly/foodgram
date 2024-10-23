@@ -31,10 +31,15 @@ class UsersView(
     serializer_class = UserSerializer
 
 
-class UserProfileView(ViewSet):
+class UserProfileView(GenericViewSet):
     @action(detail=False, methods=['get'])
     def me(self, request):
-        return Response(UserSerializer(request.user).data)
+        return Response(
+            UserSerializer(
+                request.user,
+                context=self.get_serializer_context(),
+            ).data
+        )
 
     @action(
         detail=False,
@@ -42,7 +47,11 @@ class UserProfileView(ViewSet):
         url_path='me/avatar',
     )
     def avatar(self, request):
-        serializer = AvatarSerializer(instance=request.user, data=request.data)
+        serializer = AvatarSerializer(
+            instance=request.user,
+            data=request.data,
+            context=self.get_serializer_context(),
+        )
         serializer.is_valid(raise_exception=True)
         serializer.save()
 
@@ -79,13 +88,14 @@ class AuthView(ViewSet):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-class SubscriptionView(ViewSet):
+class SubscriptionView(GenericViewSet):
     @action(detail=False, methods=['get'])
     def subscriptions(self, request):
         return Response(
             UserSerializer(
                 request.user.subscriptions.all(),
                 many=True,
+                context=self.get_serializer_context(),
             ).data
         )
 
@@ -103,7 +113,10 @@ class SubscriptionView(ViewSet):
         current_user.subscriptions.add(user_to_subscribe)
 
         return Response(
-            UserSerializer(user_to_subscribe).data,
+            UserSerializer(
+                user_to_subscribe,
+                context=self.get_serializer_context(),
+            ).data,
             status=status.HTTP_201_CREATED,
         )
 
