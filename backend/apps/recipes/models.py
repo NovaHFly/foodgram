@@ -1,3 +1,4 @@
+from annoying.fields import AutoOneToOneField
 from django.contrib.auth import get_user_model
 from django.db import models
 
@@ -58,6 +59,15 @@ class RecipeIngredient(models.Model):
         related_name='ingredient_to_recipe',
     )
     amount = models.IntegerField()
+
+
+class ShoppingCart(models.Model):
+    user = AutoOneToOneField(
+        User,
+        related_name='shopping_cart',
+        on_delete=models.CASCADE,
+    )
+    recipes = models.ManyToManyField(Recipe)
 
 
 class ShortLink(models.Model):
