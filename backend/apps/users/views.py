@@ -29,6 +29,7 @@ class UsersView(
 ):
     queryset = FoodgramUser.objects.all()
     serializer_class = UserSerializer
+    permission_classes = [AllowAny]
 
 
 class UserProfileView(GenericViewSet):

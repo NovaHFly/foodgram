@@ -39,8 +39,10 @@ class UserSerializer(serializers.ModelSerializer):
     def get_is_subscribed(self, obj):
         if request := self.context.get('request', None):
             current_user = request.user
+            if current_user.is_anonymous:
+                return False
             return obj in current_user.subscriptions.all()
-        return None
+        return False
 
     def validate_password(self, data):
         validate_password(data)
