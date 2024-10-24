@@ -8,7 +8,7 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
 
-from .filters import IngredientFilter
+from .filters import IngredientFilter, RecipeFilter
 from .models import Ingredient, Recipe, ShortLink, Tag
 from .permissions import IsAuthorOrReadOnly
 from .serializers import (
@@ -27,8 +27,8 @@ class IngredientsView(ReadOnlyModelViewSet):
     queryset = Ingredient.objects.all()
     serializer_class = IngredientSerializer
     permission_classes = [IsAuthorOrReadOnly]
-    filter_backends = [DjangoFilterBackend]
     pagination_class = None
+    filter_backends = [DjangoFilterBackend]
     filterset_class = IngredientFilter
 
 
@@ -44,6 +44,8 @@ class RecipesView(ModelViewSet):
     serializer_class = RecipeSerializer
     http_method_names = ['get', 'post', 'patch', 'delete', 'head', 'options']
     permission_classes = [IsAuthorOrReadOnly]
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = RecipeFilter
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
