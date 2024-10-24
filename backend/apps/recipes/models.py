@@ -50,7 +50,7 @@ class Recipe(models.Model):
         through='RecipeIngredient',
     )
     favorited_by_users = models.ManyToManyField(
-        User, related_name='favorited_recipes'
+        User, related_name='favorited_recipes', blank=True,
     )
 
     def __str__(self) -> str:
