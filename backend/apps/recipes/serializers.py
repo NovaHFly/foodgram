@@ -70,6 +70,7 @@ class RecipeSerializer(serializers.ModelSerializer):
     )
     image = Base64ImageField()
     is_favorited = serializers.SerializerMethodField()
+    is_in_shopping_cart = serializers.SerializerMethodField()
     author = users_serializers.UserSerializer(read_only=True)
 
     class Meta:
@@ -79,6 +80,7 @@ class RecipeSerializer(serializers.ModelSerializer):
             'tags',
             'ingredients',
             'is_favorited',
+            'is_in_shopping_cart',
             'name',
             'author',
             'image',
@@ -95,6 +97,13 @@ class RecipeSerializer(serializers.ModelSerializer):
                 return False
             return obj in current_user.favorited_recipes.all()
         return False
+
+    def get_is_in_shopping_cart(self, obj):
+        request = self.context['request']
+        current_user = request.user
+        if current_user.is_anonymous:
+            return False
+        return obj in current_user.shopping_cart.recipes.all()
 
     def _write(self, validated_data, recipe=None):
         recipe_ingredients = validated_data.pop('recipe_to_ingredient', [])
