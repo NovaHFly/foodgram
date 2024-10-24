@@ -1,5 +1,6 @@
 from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404
+from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import status
 from rest_framework.decorators import action, api_view
 from rest_framework.permissions import IsAuthenticated
@@ -7,6 +8,7 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
 
+from .filters import IngredientFilter
 from .models import Ingredient, Recipe, ShortLink, Tag
 from .permissions import IsAuthorOrReadOnly
 from .serializers import (
@@ -25,7 +27,9 @@ class IngredientsView(ReadOnlyModelViewSet):
     queryset = Ingredient.objects.all()
     serializer_class = IngredientSerializer
     permission_classes = [IsAuthorOrReadOnly]
+    filter_backends = [DjangoFilterBackend]
     pagination_class = None
+    filterset_class = IngredientFilter
 
 
 class TagsView(ReadOnlyModelViewSet):
