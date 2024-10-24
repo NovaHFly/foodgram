@@ -56,6 +56,10 @@ class Recipe(models.Model):
     def __str__(self) -> str:
         return f'{self.name} - {self.author}'
 
+    @property
+    def favorite_count(self) -> int:
+        return self.favorited_by_users.count()
+
 
 class RecipeIngredient(models.Model):
     recipe = models.ForeignKey(
