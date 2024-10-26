@@ -15,3 +15,10 @@ class IsAuthorOrReadOnly(permissions.IsAuthenticatedOrReadOnly):
             request.method in permissions.SAFE_METHODS
             or obj.author == request.user
         )
+
+
+class IsStaffOrSuperuser(permissions.IsAuthenticated):
+    def has_object_permission(self, request, view, obj):
+        return not request.user.is_anonymous and (
+            request.user.is_staff or request.user.is_superuser
+        )

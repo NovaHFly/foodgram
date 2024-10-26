@@ -10,7 +10,7 @@ from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
 
 from .filters import IngredientFilter, RecipeFilter
 from .models import Ingredient, Recipe, ShortLink, Tag
-from .permissions import IsAuthorOrReadOnly
+from .permissions import IsAuthorOrReadOnly, IsStaffOrSuperuser
 from .serializers import (
     IngredientSerializer,
     RecipeSerializer,
@@ -43,7 +43,7 @@ class RecipesView(ModelViewSet):
     queryset = Recipe.objects.all()
     serializer_class = RecipeSerializer
     http_method_names = ['get', 'post', 'patch', 'delete', 'head', 'options']
-    permission_classes = [IsAuthorOrReadOnly]
+    permission_classes = [IsAuthorOrReadOnly | IsStaffOrSuperuser]
     filter_backends = [DjangoFilterBackend]
     filterset_class = RecipeFilter
 
