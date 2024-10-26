@@ -82,7 +82,7 @@ class RecipesView(ModelViewSet):
         user.favorited_recipes.remove(recipe)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-    @action(detail=True, methods=['get'])
+    @action(detail=True, methods=['get'], url_path='get-link')
     def get_link(self, request, pk: int):
         self.get_object()
         serializer = ShortLinkSerializer(
