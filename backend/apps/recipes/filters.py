@@ -26,12 +26,16 @@ class RecipeFilter(django_filters.FilterSet):
         fields = ['author']
 
     def favorited_by_current_user(self, queryset, name, value):
+        if self.request.user.is_anonymous:
+            return queryset.none()
         value = int(value)
         if not value:
             return queryset.exclude(favorited_by_users__in=[self.request.user])
         return queryset.filter(favorited_by_users__in=[self.request.user])
 
     def in_current_user_shopping_cart(self, queryset, name, value):
+        if self.request.user.is_anonymous:
+            return queryset.none()
         value = int(value)
         if not value:
             return queryset.exclude(shoppingcart__user__in=[self.request.user])
