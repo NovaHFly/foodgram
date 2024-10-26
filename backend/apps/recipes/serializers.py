@@ -169,7 +169,10 @@ class ShortLinkSerializer(serializers.ModelSerializer):
             if not ShortLink.objects.filter(short_url=short_url).exists():
                 break
 
-        short_link, _ = ShortLink.objects.get_or_create(
+        if ShortLink.objects.filter(full_url=full_url).exists():
+            return ShortLink.objects.get(full_url=full_url)
+
+        short_link = ShortLink.objects.create(
             full_url=full_url,
             short_url=short_url,
         )
