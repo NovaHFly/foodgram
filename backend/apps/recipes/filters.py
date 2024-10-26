@@ -42,6 +42,5 @@ class RecipeFilter(django_filters.FilterSet):
         return queryset.filter(shoppingcart__user__in=[self.request.user])
 
     def filter_tags(self, queryset, name, value):
-        for val in self.request.GET.getlist(name):
-            queryset = queryset.filter(tags__slug=val)
-        return queryset
+        arg_list = self.request.GET.getlist('tags')
+        return queryset.filter(tags__slug__in=arg_list)
