@@ -67,7 +67,8 @@ class RecipesView(ModelViewSet):
             ShortRecipeSerializer(
                 recipe,
                 context=self.get_serializer_context(),
-            ).data
+            ).data,
+            status=status.HTTP_201_CREATED,
         )
 
     @favorite.mapping.delete
