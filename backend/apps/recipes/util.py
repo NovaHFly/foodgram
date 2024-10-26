@@ -1,3 +1,7 @@
+from collections import Counter
+from typing import Any, Callable, Iterable
+
+
 def generate_shopping_cart(recipes) -> str:
     ingredients = {}
 
@@ -22,3 +26,12 @@ def generate_shopping_cart(recipes) -> str:
         out += f'{name} ({unit}) - {amount}\n'
 
     return out
+
+
+def contains_duplicates(
+    collection: Iterable,
+    key: Callable[[Any], Any] = lambda x: x,
+) -> bool:
+    _collection = map(key, collection)
+    counter = Counter(_collection)
+    return counter.most_common(1)[0][1] > 1

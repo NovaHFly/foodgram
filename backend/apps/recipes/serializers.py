@@ -5,6 +5,7 @@ from common.util import generate_token
 from users import serializers as users_serializers
 
 from .models import Ingredient, Recipe, RecipeIngredient, ShortLink, Tag
+from .util import contains_duplicates
 
 
 class TagSerializer(serializers.ModelSerializer):
@@ -17,6 +18,7 @@ class TagSerializer(serializers.ModelSerializer):
         return {'id': data}
 
     def validate(self, attrs):
+        # TODO: Move to id field validation
         tag_id = attrs['id']
         if not isinstance(tag_id, int):
             raise serializers.ValidationError(f'{tag_id} is not an integer!')
@@ -47,6 +49,7 @@ class RecipeIngredientSerializer(serializers.ModelSerializer):
     class Meta:
         model = RecipeIngredient
         fields = ('id', 'amount', 'name', 'measurement_unit')
+        extra_kwargs = {'amount': {'min_value': 1}}
 
     def validate_id(self, data):
         if not Ingredient.objects.filter(id=data).exists():
@@ -63,9 +66,13 @@ class ShortRecipeSerializer(serializers.ModelSerializer):
 
 
 class RecipeSerializer(serializers.ModelSerializer):
-    tags = TagSerializer(many=True)
+    tags = TagSerializer(
+        many=True,
+        allow_empty=False,
+    )
     ingredients = RecipeIngredientSerializer(
         many=True,
+        allow_empty=False,
         source='recipe_to_ingredient',
     )
     image = Base64ImageField()
@@ -87,8 +94,20 @@ class RecipeSerializer(serializers.ModelSerializer):
             'cooking_time',
             'text',
         )
-
         read_only_fields = ('author',)
+        extra_kwargs = {'cooking_time': {'min_value': 1}}
+
+    def validate_ingredients(self, data):
+        if contains_duplicates(data, lambda x: x['ingredient']['id']):
+            raise serializers.ValidationError(
+                'Cannot add 2 of the same ingredient!'
+            )
+        return data
+
+    def validate_tags(self, data):
+        if contains_duplicates(data, lambda x: x['id']):
+            raise serializers.ValidationError('Cannot add 2 of the same tag!')
+        return data
 
     def get_is_favorited(self, obj):
         if request := self.context.get('request', None):
