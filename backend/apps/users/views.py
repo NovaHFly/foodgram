@@ -17,6 +17,7 @@ from .serializers import (
     AvatarSerializer,
     PasswordChangeSerializer,
     SubscriptionUserSerializer,
+    UserRegisterSerializer,
     UserSerializer,
 )
 
@@ -28,8 +29,12 @@ class UsersView(
     GenericViewSet,
 ):
     queryset = FoodgramUser.objects.all()
-    serializer_class = UserSerializer
     permission_classes = [AllowAny]
+
+    def get_serializer_class(self):
+        if self.action == 'create':
+            return UserRegisterSerializer
+        return UserSerializer
 
     @action(
         detail=False,

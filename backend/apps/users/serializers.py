@@ -7,31 +7,18 @@ from recipes import serializers as recipes_serializers
 from .models import FoodgramUser
 
 
-class UserSerializer(serializers.ModelSerializer):
-    is_subscribed = serializers.SerializerMethodField()
-
+class UserRegisterSerializer(serializers.ModelSerializer):
     class Meta:
         model = FoodgramUser
-        fields = (
+        fields = [
             'id',
             'email',
             'username',
             'first_name',
             'last_name',
             'password',
-            'avatar',
-            'is_subscribed',
-        )
+        ]
         extra_kwargs = {'password': {'write_only': True}}
-        read_only_fields = ('avatar',)
-
-    def get_is_subscribed(self, obj):
-        if request := self.context.get('request', None):
-            current_user = request.user
-            if current_user.is_anonymous:
-                return False
-            return obj in current_user.subscriptions.all()
-        return False
 
     def validate_password(self, data):
         validate_password(data)
@@ -43,6 +30,30 @@ class UserSerializer(serializers.ModelSerializer):
         user.set_password(password)
         user.save()
         return user
+
+
+class UserSerializer(serializers.ModelSerializer):
+    is_subscribed = serializers.SerializerMethodField()
+
+    class Meta:
+        model = FoodgramUser
+        fields = (
+            'id',
+            'email',
+            'username',
+            'first_name',
+            'last_name',
+            'avatar',
+            'is_subscribed',
+        )
+
+    def get_is_subscribed(self, obj):
+        if request := self.context.get('request', None):
+            current_user = request.user
+            if current_user.is_anonymous:
+                return False
+            return obj in current_user.subscriptions.all()
+        return False
 
 
 class SubscriptionUserSerializer(UserSerializer):
