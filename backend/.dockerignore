@@ -1,0 +1,7 @@
+/.*
+db.sqlite3
+__pycache__
+media
+pyproject.toml
+poetry.lock
+requirements.dev.txt
