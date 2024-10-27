@@ -18,6 +18,10 @@ psycopg2 = "^2.9.10"
 [tool.poetry.group.dev.dependencies]
 python-dotenv = "^1.0.1"
 
+
+[tool.poetry.group.testing.dependencies]
+ruff = "^0.7.1"
+
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
