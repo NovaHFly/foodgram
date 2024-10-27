@@ -28,18 +28,20 @@ services:
   frontend:
     container_name: foodgram-front
     build: frontend
+    
     command: cp -r /app/build/. /static/
     volumes:
       - static:/static
 
   nginx:
     container_name: foodgram-gateway
-    build: gateway
+    image: nginx:1.25.4-alpine
     ports:
       - 8010:80
     depends_on:
       - backend
       - frontend
     volumes:
+      - ./nginx/nginx.conf:/etc/nginx/templates/default.conf.template
       - static:/static
       - media:/media
