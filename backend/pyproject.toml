@@ -12,6 +12,7 @@ djangorestframework = "3.12.4"
 pillow = "9.0.0"
 django-annoying = "^0.10.7"
 django-filter = "23.5"
+psycopg2 = "^2.9.10"
 
 
 [tool.poetry.group.dev.dependencies]
