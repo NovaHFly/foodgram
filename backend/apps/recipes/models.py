@@ -10,8 +10,8 @@ User = get_user_model()
 
 
 class Tag(models.Model):
-    name = models.CharField(max_length=32, unique=True)
-    slug = models.SlugField(unique=True)
+    name = models.CharField(max_length=64, unique=True)
+    slug = models.SlugField(max_length=32, unique=True)
 
     def __str__(self) -> str:
         return f'#{self.slug}'
