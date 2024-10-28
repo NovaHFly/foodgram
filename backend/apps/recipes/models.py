@@ -19,11 +19,11 @@ class Tag(models.Model):
 
 class Ingredient(models.Model):
     name = models.CharField(
-        max_length=32,
+        max_length=64,
         unique=True,
     )
     measurement_unit = models.CharField(
-        max_length=8,
+        max_length=16,
     )
 
     def __str__(self) -> str:
