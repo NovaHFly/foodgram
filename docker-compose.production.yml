@@ -23,8 +23,8 @@ services:
     image: novahfly/foodgram-backend
     env_file: .env
     depends_on:
-      - db:
-          condition: service_healthy
+      db:
+        condition: service_healthy
     volumes:
       - static:/static
       - media:/media
