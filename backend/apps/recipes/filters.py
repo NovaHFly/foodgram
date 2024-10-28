@@ -19,11 +19,7 @@ class RecipeFilter(django_filters.FilterSet):
     is_in_shopping_cart = django_filters.ChoiceFilter(
         choices=[[0, False], [1, True]], method='in_current_user_shopping_cart'
     )
-    tags = django_filters.ModelMultipleChoiceFilter(
-        field_name='tags__slug',
-        to_field_name='tags',
-        queryset=Tag.objects.all(),
-    )
+    tags = django_filters.ModelMultipleChoiceFilter(field_name='tags__slug')
 
     class Meta:
         model = Recipe
