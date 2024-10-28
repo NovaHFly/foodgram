@@ -9,14 +9,12 @@ volumes:
 services:
 
   db:
-    container_name: foodgram-db
     image: postgres:13
     env_file: .env
     volumes:
       - pg_data:/var/lib/postgresql/data
 
   backend:
-    container_name: foodgram-backend
     image: novahfly/foodgram-backend
     env_file: .env
     depends_on:
@@ -26,7 +24,6 @@ services:
       - media:/media
 
   frontend:
-    container_name: foodgram-front
     image: novahfly/foodgram-frontend
     
     command: cp -r /app/build/. /static/
@@ -34,7 +31,6 @@ services:
       - static:/static
 
   nginx:
-    container_name: foodgram-gateway
     image: nginx:1.25.4-alpine
     ports:
       - 8010:80
