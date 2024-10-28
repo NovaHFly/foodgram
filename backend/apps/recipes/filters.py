@@ -19,11 +19,11 @@ class RecipeFilter(django_filters.FilterSet):
     is_in_shopping_cart = django_filters.ChoiceFilter(
         choices=[[0, False], [1, True]], method='in_current_user_shopping_cart'
     )
-    tags = django_filters.CharFilter(method='filter_tags')
+    tags = django_filters.AllValuesMultipleFilter()
 
     class Meta:
         model = Recipe
-        fields = ['author']
+        fields = ['author', 'tags', 'is_favorited', 'is_in_shopping_cart']
 
     def favorited_by_current_user(self, queryset, name, value):
         if self.request.user.is_anonymous:
@@ -40,7 +40,3 @@ class RecipeFilter(django_filters.FilterSet):
         if not value:
             return queryset.exclude(shoppingcart__user__in=[self.request.user])
         return queryset.filter(shoppingcart__user__in=[self.request.user])
-
-    def filter_tags(self, queryset, name, value):
-        arg_list = self.request.GET.getlist('tags')
-        return queryset.filter(tags__slug__in=arg_list)
