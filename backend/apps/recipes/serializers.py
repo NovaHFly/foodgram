@@ -49,7 +49,6 @@ class RecipeIngredientSerializer(serializers.ModelSerializer):
     class Meta:
         model = RecipeIngredient
         fields = ('id', 'amount', 'name', 'measurement_unit')
-        extra_kwargs = {'amount': {'min_value': 1}}
 
     def validate_id(self, data):
         if not Ingredient.objects.filter(id=data).exists():
