@@ -152,6 +152,7 @@ class ShoppingCart(models.Model):
     recipes = models.ManyToManyField(
         Recipe,
         verbose_name='Рецепты',
+        blank=True,
     )
 
     class Meta:
