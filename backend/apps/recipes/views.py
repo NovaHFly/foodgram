@@ -22,7 +22,7 @@ from .util import generate_shopping_cart
 # TODO: Remove duplicate code
 
 SHOPPING_LIST_RESPONSE_HEADERS = {
-    'Content-Disposition': 'attachment, filename="список_покупок.txt"'
+    'Content-Disposition': 'attachment; filename="список_покупок.txt"'
 }
 
 
