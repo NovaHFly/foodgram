@@ -1,8 +1,19 @@
 from collections import Counter
 from typing import Any, Callable, Iterable
 
+from .models import Recipe
 
-def generate_shopping_cart(recipes) -> str:
+
+def generate_shopping_list(recipes: Iterable[Recipe]) -> str:
+    """Generate text content of shopping list file.
+
+    Args:
+        recipes (Iterable[Recipe]): Collection of recipes.
+
+    Returns:
+        str: Shopping list
+    """
+    # TODO: Remove excess nesting
     ingredients = {}
 
     for recipe in recipes:
@@ -32,6 +43,16 @@ def contains_duplicates(
     collection: Iterable,
     key: Callable[[Any], Any] = lambda x: x,
 ) -> bool:
+    """Check if collection contains duplicate items.
+
+    Args:
+        collection [Iterable]: Collection which can be iterated over.
+        key [Callable]: Function which returns key used to check for duplicate.
+
+    Returns:
+        bool: True if collection contains duplicate items.
+    """
+
     _collection = map(key, collection)
     counter = Counter(_collection)
     return counter.most_common(1)[0][1] > 1

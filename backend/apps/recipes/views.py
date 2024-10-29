@@ -99,7 +99,7 @@ class RecipesView(ModelViewSet):
     def download_shopping_cart(self, request):
         recipes = request.user.shopping_cart.recipes.all()
         return HttpResponse(
-            generate_shopping_cart(recipes),
+            generate_shopping_list(recipes),
             content_type='text/plain; charset=UTF-8',
         )
 
