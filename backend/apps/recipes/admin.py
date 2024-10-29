@@ -45,6 +45,7 @@ class RecipeAdmin(admin.ModelAdmin):
     list_display_links = ('name',)
     search_fields = ('name', 'author')
     list_filter = ('tags',)
+    filter_horizontal = ('tags', 'favorited_by_users')
     inlines = (RecipeIngredientInline,)
 
 
@@ -58,3 +59,4 @@ class ShortLinkAdmin(admin.ModelAdmin):
 class ShoppingCartAdmin(admin.ModelAdmin):
     list_display = ('user',)
     list_display_links = ('user',)
+    filter_horizontal = ['recipes']
