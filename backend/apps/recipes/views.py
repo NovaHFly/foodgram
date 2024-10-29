@@ -1,4 +1,4 @@
-from django.http import HttpResponseRedirect
+from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import status
@@ -98,7 +98,7 @@ class RecipesView(ModelViewSet):
     @action(detail=False, methods=['get'])
     def download_shopping_cart(self, request):
         recipes = request.user.shopping_cart.recipes.all()
-        return Response(
+        return HttpResponse(
             generate_shopping_cart(recipes),
             content_type='text/plain charset=utf-8',
         )
