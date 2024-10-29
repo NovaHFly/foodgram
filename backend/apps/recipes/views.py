@@ -21,8 +21,6 @@ from .util import generate_shopping_cart
 
 # TODO: Remove duplicate code
 
-SHOPPING_LIST_CONTENT_DISPOSITION = 'attachment; filename="список_покупок.txt"'
-
 
 class IngredientsView(ReadOnlyModelViewSet):
     queryset = Ingredient.objects.all()
@@ -100,11 +98,10 @@ class RecipesView(ModelViewSet):
     @action(detail=False, methods=['get'])
     def download_shopping_cart(self, request):
         recipes = request.user.shopping_cart.recipes.all()
-        response = HttpResponse(
-            generate_shopping_cart(recipes), content_type='text/plain'
+        return HttpResponse(
+            generate_shopping_cart(recipes),
+            content_type='text/plain; charset=UTF-8',
         )
-        response['Content-Disposition'] = SHOPPING_LIST_CONTENT_DISPOSITION
-        return response
 
     @action(
         detail=True,
