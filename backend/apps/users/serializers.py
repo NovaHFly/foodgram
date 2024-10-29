@@ -58,9 +58,7 @@ class UserSerializer(serializers.ModelSerializer):
 class SubscriptionUserSerializer(UserSerializer):
     """Serializer used to represent user object in subscription list.
 
-    Can be extended by injecting new fields into."""
-
-    class Meta(UserSerializer.Meta): ...
+    Can be replaced with extended version."""
 
 
 class AvatarSerializer(serializers.ModelSerializer):

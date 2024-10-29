@@ -199,42 +199,37 @@ class ShortLinkSerializer(serializers.ModelSerializer):
         return short_link
 
 
-# ^ Inject recipes list into subscription user serializer
-def get_recipes_count(self, obj):
-    return obj.recipes.count()
+class SubscriptionUserSerializer(users_serializers.SubscriptionUserSerializer):
+    recipes = serializers.SerializerMethodField()
+    recipes_count = serializers.SerializerMethodField()
+
+    class Meta:
+        fields = users_serializers.SubscriptionUserSerializer.Meta.fields + (
+            'recipes',
+            'recipes_count',
+        )
+
+    def get_recipes_count(self, obj):
+        return obj.recipes.count()
+
+    def get_recipes(self, obj):
+        request = self.context['request']
+        recipes = obj.recipes.all()
+
+        data = ShortRecipeSerializer(
+            recipes,
+            many=True,
+            context=self.context,
+        ).data
+
+        if (
+            'recipes_limit' in request.query_params
+            and request.query_params['recipes_limit'].isdigit()
+        ):
+            limit = int(request.query_params['recipes_limit'])
+            data = data[:limit]
+
+        return data
 
 
-def get_recipes(self, obj):
-    request = self.context['request']
-    recipes = obj.recipes.all()
-
-    data = ShortRecipeSerializer(
-        recipes,
-        many=True,
-        context=self.context,
-    ).data
-
-    if (
-        'recipes_limit' in request.query_params
-        and request.query_params['recipes_limit'].isdigit()
-    ):
-        limit = int(request.query_params['recipes_limit'])
-        data = data[:limit]
-
-    return data
-
-
-users_serializers.SubscriptionUserSerializer.get_recipes = get_recipes
-users_serializers.SubscriptionUserSerializer.get_recipes_count = (
-    get_recipes_count
-)
-users_serializers.SubscriptionUserSerializer.recipes = (
-    serializers.SerializerMethodField()
-)
-users_serializers.SubscriptionUserSerializer.recipes_count = (
-    serializers.SerializerMethodField()
-)
-users_serializers.SubscriptionUserSerializer.Meta.fields += (
-    'recipes',
-    'recipes_count',
-)
+users_serializers.SubscriptionUserSerializer = SubscriptionUserSerializer
