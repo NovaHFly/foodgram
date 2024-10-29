@@ -20,7 +20,7 @@ services:
       retries: 5
 
   backend:
-    image: novahfly/foodgram-backend
+    image: novahfly/foodgram-backend:latest
     env_file: .env
     depends_on:
       db:
@@ -30,7 +30,7 @@ services:
       - media:/media
 
   frontend:
-    image: novahfly/foodgram-frontend
+    image: novahfly/foodgram-frontend:latest
     
     command: cp -r /app/build/. /static/
     volumes:
