@@ -2,7 +2,6 @@ from django.contrib.auth.password_validation import validate_password
 from rest_framework import serializers
 
 from common.serializers import Base64ImageField
-from recipes import serializers as recipes_serializers
 
 from .models import FoodgramUser
 
@@ -57,36 +56,9 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class SubscriptionUserSerializer(UserSerializer):
-    recipes = serializers.SerializerMethodField()
-    recipes_count = serializers.SerializerMethodField()
+    """Serializer used to represent user object in subscription list.
 
-    class Meta(UserSerializer.Meta):
-        fields = UserSerializer.Meta.fields + (
-            'recipes',
-            'recipes_count',
-        )
-
-    def get_recipes_count(self, obj):
-        return obj.recipes.count()
-
-    def get_recipes(self, obj):
-        request = self.context['request']
-        recipes = obj.recipes.all()
-
-        data = recipes_serializers.ShortRecipeSerializer(
-            recipes,
-            many=True,
-            context=self.context,
-        ).data
-
-        if (
-            'recipes_limit' in request.query_params
-            and request.query_params['recipes_limit'].isdigit()
-        ):
-            limit = int(request.query_params['recipes_limit'])
-            data = data[:limit]
-
-        return data
+    Can be extended by injecting new fields into."""
 
 
 class AvatarSerializer(serializers.ModelSerializer):
