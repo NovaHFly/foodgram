@@ -203,7 +203,7 @@ class SubscriptionUserSerializer(users_serializers.SubscriptionUserSerializer):
     recipes = serializers.SerializerMethodField()
     recipes_count = serializers.SerializerMethodField()
 
-    class Meta:
+    class Meta(users_serializers.SubscriptionUserSerializer.Meta):
         fields = users_serializers.SubscriptionUserSerializer.Meta.fields + (
             'recipes',
             'recipes_count',
