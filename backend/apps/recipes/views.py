@@ -21,9 +21,7 @@ from .util import generate_shopping_cart
 
 # TODO: Remove duplicate code
 
-SHOPPING_LIST_RESPONSE_HEADERS = {
-    'Content-Disposition': 'attachment; filename="список_покупок.txt"'
-}
+SHOPPING_LIST_CONTENT_DISPOSITION = 'attachment; filename="список_покупок.txt"'
 
 
 class IngredientsView(ReadOnlyModelViewSet):
@@ -102,11 +100,11 @@ class RecipesView(ModelViewSet):
     @action(detail=False, methods=['get'])
     def download_shopping_cart(self, request):
         recipes = request.user.shopping_cart.recipes.all()
-        return HttpResponse(
-            generate_shopping_cart(recipes),
-            content_type='text/plain charset=utf-8',
-            headers=SHOPPING_LIST_RESPONSE_HEADERS,
+        response = HttpResponse(
+            generate_shopping_cart(recipes), content_type='text/plain'
         )
+        response['Content-Disposition'] = SHOPPING_LIST_CONTENT_DISPOSITION
+        return response
 
     @action(
         detail=True,
