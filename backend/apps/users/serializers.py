@@ -106,9 +106,9 @@ class AvatarSerializer(serializers.ModelSerializer):
         model = FoodgramUser
         fields = ('avatar',)
 
-    def update(self, instance, validated_data):
-        instance.avatar.delete()
-        return super().update(instance, validated_data)
+    def update(self, user: FoodgramUser, validated_data: dict) -> FoodgramUser:
+        user.avatar.delete()
+        return super().update(user, validated_data)
 
 
 class AuthSerializer(serializers.Serializer):
@@ -122,12 +122,12 @@ class AuthSerializer(serializers.Serializer):
     email = serializers.EmailField()
     password = serializers.CharField()
 
-    def validate_email(self, data):
-        if not FoodgramUser.objects.filter(email=data).exists():
+    def validate_email(self, email: str) -> str:
+        if not FoodgramUser.objects.filter(email=email).exists():
             raise serializers.ValidationError('Invalid email or password!')
-        return data
+        return email
 
-    def validate(self, attrs):
+    def validate(self, attrs: dict) -> dict:
         user = self.user = FoodgramUser.objects.get(email=attrs['email'])
         if not user.check_password(attrs['password']):
             raise serializers.ValidationError('Invalid email or password!')
@@ -149,16 +149,16 @@ class PasswordChangeSerializer(serializers.ModelSerializer):
         model = FoodgramUser
         fields = ('new_password', 'current_password')
 
-    def validate_current_password(self, data):
-        if not self.instance.check_password(data):
+    def validate_current_password(self, password: str) -> str:
+        if not self.instance.check_password(password):
             raise serializers.ValidationError('Invalid password!')
-        return data
+        return password
 
-    def validate_new_password(self, data):
-        validate_password(data)
-        return data
+    def validate_new_password(self, password: str) -> str:
+        validate_password(password)
+        return password
 
-    def update(self, instance, validated_data):
-        instance.set_password(validated_data['new_password'])
-        instance.save()
-        return instance
+    def update(self, user: FoodgramUser, validated_data: dict) -> FoodgramUser:
+        user.set_password(validated_data['new_password'])
+        user.save()
+        return user

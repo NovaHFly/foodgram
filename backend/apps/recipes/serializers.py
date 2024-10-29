@@ -1,5 +1,3 @@
-from typing import TypeVar
-
 from rest_framework import serializers
 
 from common.serializers import Base64ImageField
@@ -9,8 +7,6 @@ from users.models import FoodgramUser
 
 from .models import Ingredient, Recipe, RecipeIngredient, ShortLink, Tag
 from .util import contains_duplicates
-
-Attrs = TypeVar('Attrs', str, int)
 
 
 class TagSerializer(serializers.ModelSerializer):
@@ -24,13 +20,13 @@ class TagSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Tag
-        fields = ('id', 'name', 'slug')
-        read_only_fields = ('name', 'slug')
+        fields = ['id', 'name', 'slug']
+        read_only_fields = ['name', 'slug']
 
     def to_internal_value(self, data: int) -> dict[str, int]:
         return {'id': data}
 
-    def validate(self, attrs: dict[Attrs]) -> dict[Attrs]:
+    def validate(self, attrs: dict[str, int]) -> dict[str, int]:
         tag_id = attrs['id']
         if not isinstance(tag_id, int):
             raise serializers.ValidationError(f'{tag_id} is not an integer!')
@@ -52,7 +48,7 @@ class IngredientSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Ingredient
-        fields = ('id', 'name', 'measurement_unit')
+        fields = ['id', 'name', 'measurement_unit']
 
 
 class RecipeIngredientSerializer(serializers.ModelSerializer):
@@ -77,7 +73,7 @@ class RecipeIngredientSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = RecipeIngredient
-        fields = ('id', 'amount', 'name', 'measurement_unit')
+        fields = ['id', 'amount', 'name', 'measurement_unit']
 
     def validate_id(self, value: int) -> int:
         if not Ingredient.objects.filter(id=value).exists():
@@ -99,7 +95,7 @@ class ShortRecipeSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Recipe
-        fields = ('id', 'name', 'image', 'cooking_time')
+        fields = ['id', 'name', 'image', 'cooking_time']
 
 
 class RecipeSerializer(serializers.ModelSerializer):
@@ -136,7 +132,7 @@ class RecipeSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Recipe
-        fields = (
+        fields = [
             'id',
             'tags',
             'ingredients',
@@ -147,7 +143,7 @@ class RecipeSerializer(serializers.ModelSerializer):
             'image',
             'cooking_time',
             'text',
-        )
+        ]
 
     def validate_ingredients(self, value: list[dict]) -> list[dict]:
         if contains_duplicates(value, lambda x: x['ingredient']['id']):
@@ -230,7 +226,7 @@ class ShortLinkSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ShortLink
-        fields = ('id', 'recipe_id')
+        fields = ['id', 'recipe_id']
 
     def to_representation(self, short_link: ShortLink) -> dict[str, str]:
         # TODO: Move to utils
@@ -239,7 +235,7 @@ class ShortLinkSerializer(serializers.ModelSerializer):
         )
         return {'short-link': f'{host_with_schema}/s/{short_link.short_url}'}
 
-    def create(self, validated_data):
+    def create(self, validated_data: dict) -> ShortLink:
         host_with_schema = (
             self.context['request'].get_raw_uri().partition('/api/')[0]
         )
@@ -272,10 +268,8 @@ class SubscriptionUserSerializer(users_serializers.SubscriptionUserSerializer):
     recipes_count = serializers.SerializerMethodField()
 
     class Meta(users_serializers.SubscriptionUserSerializer.Meta):
-        fields = users_serializers.SubscriptionUserSerializer.Meta.fields + (
-            'recipes',
-            'recipes_count',
-        )
+        fields = users_serializers.SubscriptionUserSerializer.Meta.fields
+        fields += ('recipes', 'recipes_count')
 
     def get_recipes_count(self, user: FoodgramUser) -> int:
         return user.recipes.count()

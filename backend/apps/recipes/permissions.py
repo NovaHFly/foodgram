@@ -1,10 +1,10 @@
 from django.db.models import Model
-from rest_framework import permissions
+from rest_framework.permissions import SAFE_METHODS, IsAuthenticatedOrReadOnly
 from rest_framework.request import Request
 from rest_framework.views import View
 
 
-class IsAuthorOrReadOnly(permissions.IsAuthenticatedOrReadOnly):
+class IsAuthorOrReadOnly(IsAuthenticatedOrReadOnly):
     """Allow read only access for every user and full access to item author."""
 
     def has_object_permission(
@@ -13,7 +13,4 @@ class IsAuthorOrReadOnly(permissions.IsAuthenticatedOrReadOnly):
         _view: View,
         obj: Model,
     ) -> bool:
-        return (
-            request.method in permissions.SAFE_METHODS
-            or obj.author == request.user
-        )
+        return request.method in SAFE_METHODS or obj.author == request.user

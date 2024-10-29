@@ -17,46 +17,46 @@ class RecipeIngredientInline(admin.StackedInline):
 
 @admin.register(Ingredient)
 class IngredientAdmin(admin.ModelAdmin):
-    list_display = (
+    list_display = [
         'name',
         'measurement_unit',
-    )
-    list_display_links = ('name',)
-    search_fields = ('name',)
+    ]
+    list_display_links = ['name']
+    search_fields = ['name']
 
 
 @admin.register(Tag)
 class TagAdmin(admin.ModelAdmin):
-    list_display = (
+    list_display = [
         'slug',
         'name',
-    )
-    list_display_links = ('slug',)
-    search_fields = ('name',)
+    ]
+    list_display_links = ['slug']
+    search_fields = ['name']
 
 
 @admin.register(Recipe)
 class RecipeAdmin(admin.ModelAdmin):
-    list_display = (
+    list_display = [
         'name',
         'author',
         'favorite_count',
-    )
-    list_display_links = ('name',)
-    search_fields = ('name', 'author')
-    list_filter = ('tags',)
-    filter_horizontal = ('tags', 'favorited_by_users')
-    inlines = (RecipeIngredientInline,)
+    ]
+    list_display_links = ['name']
+    search_fields = ['name', 'author']
+    list_filter = ['tags']
+    filter_horizontal = ['tags', 'favorited_by_users']
+    inlines = [RecipeIngredientInline]
 
 
 @admin.register(ShortLink)
 class ShortLinkAdmin(admin.ModelAdmin):
-    list_display = ('short_url', 'full_url')
-    list_display_links = ('short_url',)
+    list_display = ['short_url', 'full_url']
+    list_display_links = ['short_url']
 
 
 @admin.register(ShoppingCart)
 class ShoppingCartAdmin(admin.ModelAdmin):
-    list_display = ('user',)
-    list_display_links = ('user',)
+    list_display = ['user']
+    list_display_links = ['user']
     filter_horizontal = ['recipes']

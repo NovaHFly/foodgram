@@ -12,12 +12,16 @@ class IngredientFilter(django_filters.FilterSet):
 
 
 class RecipeFilter(django_filters.FilterSet):
-    author = django_filters.NumberFilter(lookup_expr='id')
+    author = django_filters.NumberFilter(
+        lookup_expr='id',
+    )
     is_favorited = django_filters.ChoiceFilter(
-        choices=[[0, False], [1, True]], method='favorited_by_current_user'
+        choices=[[0, False], [1, True]],
+        method='favorited_by_current_user',
     )
     is_in_shopping_cart = django_filters.ChoiceFilter(
-        choices=[[0, False], [1, True]], method='in_current_user_shopping_cart'
+        choices=[[0, False], [1, True]],
+        method='in_current_user_shopping_cart',
     )
     tags = django_filters.ModelMultipleChoiceFilter(
         field_name='tags__slug',
@@ -29,6 +33,7 @@ class RecipeFilter(django_filters.FilterSet):
         model = Recipe
         fields = ['author', 'tags', 'is_favorited', 'is_in_shopping_cart']
 
+    # TODO: Duplicate code
     def favorited_by_current_user(self, queryset, name, value):
         if self.request.user.is_anonymous:
             return queryset.none()

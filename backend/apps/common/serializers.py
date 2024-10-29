@@ -1,12 +1,12 @@
 import base64
 
 from django.core.files.base import ContentFile
-from rest_framework import serializers
+from rest_framework.serializers import ImageField
 
 from common.util import generate_token
 
 
-class Base64ImageField(serializers.ImageField):
+class Base64ImageField(ImageField):
     """Field for images encoded in Base64."""
 
     def to_internal_value(self, data):

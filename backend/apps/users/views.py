@@ -1,3 +1,5 @@
+from typing import Type
+
 from rest_framework import status
 from rest_framework.authtoken.models import Token
 from rest_framework.decorators import action
@@ -9,6 +11,7 @@ from rest_framework.mixins import (
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.request import Request
 from rest_framework.response import Response
+from rest_framework.serializers import ModelSerializer
 from rest_framework.viewsets import GenericViewSet, ViewSet
 
 from .models import FoodgramUser
@@ -31,7 +34,7 @@ class UsersView(
     queryset = FoodgramUser.objects.all()
     permission_classes = [AllowAny]
 
-    def get_serializer_class(self):
+    def get_serializer_class(self) -> Type[ModelSerializer]:
         if self.action == 'create':
             return CreateUserSerializer
         return UserSerializer
@@ -41,7 +44,7 @@ class UsersView(
         methods=['get'],
         permission_classes=[IsAuthenticated],
     )
-    def me(self, request):
+    def me(self, request: Request):
         return Response(
             UserSerializer(
                 request.user,
@@ -55,7 +58,7 @@ class UsersView(
         url_path='me/avatar',
         permission_classes=[IsAuthenticated],
     )
-    def avatar(self, request):
+    def avatar(self, request: Request) -> Response:
         serializer = AvatarSerializer(
             instance=request.user,
             data=request.data,
@@ -67,7 +70,7 @@ class UsersView(
         return Response(serializer.data)
 
     @avatar.mapping.delete
-    def delete_avatar(self, request):
+    def delete_avatar(self, request: Request) -> Response:
         request.user.avatar.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
@@ -76,7 +79,7 @@ class UsersView(
         methods=['post'],
         permission_classes=[IsAuthenticated],
     )
-    def set_password(self, request):
+    def set_password(self, request: Request) -> Response:
         serializer = PasswordChangeSerializer(
             instance=request.user, data=request.data
         )
@@ -89,7 +92,7 @@ class UsersView(
         methods=['get'],
         permission_classes=[IsAuthenticated],
     )
-    def subscriptions(self, request):
+    def subscriptions(self, request: Request) -> Response:
         paginated_data = self.paginate_queryset(
             SubscriptionUserSerializer(
                 request.user.subscriptions.all(),
@@ -104,7 +107,7 @@ class UsersView(
         methods=['post'],
         permission_classes=[IsAuthenticated],
     )
-    def subscribe(self, request: Request, pk: int):
+    def subscribe(self, request: Request, pk: int) -> Response:
         user_to_subscribe = self.get_object()
         current_user = request.user
 
@@ -125,7 +128,7 @@ class UsersView(
         )
 
     @subscribe.mapping.delete
-    def unsubscribe(self, request: Request, pk: int):
+    def unsubscribe(self, request: Request, pk: int) -> Response:
         current_user = request.user
         user_to_unsubscribe = self.get_object()
 
@@ -143,7 +146,7 @@ class AuthView(ViewSet):
         methods=['post'],
         permission_classes=[AllowAny],
     )
-    def login(self, request):
+    def login(self, request: Request) -> Response:
         serializer = AuthSerializer(data=request.data)
         if serializer.is_valid(raise_exception=True):
             user = serializer.user
@@ -154,7 +157,7 @@ class AuthView(ViewSet):
         detail=False,
         methods=['post'],
     )
-    def logout(self, request):
+    def logout(self, request: Request) -> Response:
         user = request.user
         Token.objects.filter(user=user).delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
