@@ -24,6 +24,11 @@ class Tag(models.Model):
         verbose_name='Слаг',
     )
 
+    class Meta:
+        verbose_name = 'Тег'
+        verbose_name_plural = 'Теги'
+        ordering = ['name']
+
     def __str__(self) -> str:
         return f'#{self.slug}'
 
@@ -39,11 +44,20 @@ class Ingredient(models.Model):
         verbose_name='Единица измерения',
     )
 
+    class Meta:
+        verbose_name = 'Ингредиенты'
+        verbose_name_plural = 'Ингредиенты'
+        ordering = ['name']
+
     def __str__(self) -> str:
         return self.name
 
 
 class Recipe(models.Model):
+    pub_date = models.DateTimeField(
+        auto_now_add=True,
+        verbose_name='Дата публикации',
+    )
     name = models.CharField(
         max_length=MAX_NAME_LENGTH,
         verbose_name='Название',
@@ -80,6 +94,11 @@ class Recipe(models.Model):
         verbose_name='В списках избранного',
     )
 
+    class Meta:
+        verbose_name = 'Рецепт'
+        verbose_name_plural = 'Рецепты'
+        ordering = ['-pub_date']
+
     def __str__(self) -> str:
         return f'{self.name} - {self.author}'
 
@@ -107,6 +126,11 @@ class RecipeIngredient(models.Model):
         verbose_name='Количество',
     )
 
+    class Meta:
+        verbose_name = 'Ингредиент в рецепте'
+        verbose_name_plural = 'Ингредиенты в рецепте'
+        ordering = ['-recipe__pub_date']
+
     def __str__(self) -> str:
         return f'[{self.recipe.name}] <-> [{self.ingredient.name}]'
 
@@ -123,6 +147,11 @@ class ShoppingCart(models.Model):
         verbose_name='Рецепты',
     )
 
+    class Meta:
+        verbose_name = 'Корзина'
+        verbose_name_plural = 'Корзины'
+        ordering = ['user__username']
+
     def __str__(self) -> str:
         return f'Список покупок {self.user}'
 
@@ -138,6 +167,11 @@ class ShortLink(models.Model):
         unique=True,
         verbose_name='Короткий идентификатор',
     )
+
+    class Meta:
+        verbose_name = 'Короткая ссылка'
+        verbose_name_plural = 'Короткие ссылки'
+        ordering = ['full_url']
 
     def __str__(self) -> str:
         return f'{self.short_url} -> {self.full_url}'
