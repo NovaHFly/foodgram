@@ -15,9 +15,9 @@ from .models import FoodgramUser
 from .serializers import (
     AuthSerializer,
     AvatarSerializer,
+    CreateUserSerializer,
     PasswordChangeSerializer,
     SubscriptionUserSerializer,
-    UserRegisterSerializer,
     UserSerializer,
 )
 
@@ -33,7 +33,7 @@ class UsersView(
 
     def get_serializer_class(self):
         if self.action == 'create':
-            return UserRegisterSerializer
+            return CreateUserSerializer
         return UserSerializer
 
     @action(

@@ -17,7 +17,7 @@ from .serializers import (
     ShortRecipeSerializer,
     TagSerializer,
 )
-from .util import generate_shopping_cart
+from .util import generate_shopping_list
 
 # TODO: Remove duplicate code
 

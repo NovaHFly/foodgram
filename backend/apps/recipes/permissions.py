@@ -5,6 +5,8 @@ from rest_framework.views import View
 
 
 class IsAuthorOrReadOnly(permissions.IsAuthenticatedOrReadOnly):
+    """Allow read only access for every user and full access to item author."""
+
     def has_object_permission(
         self,
         request: Request,

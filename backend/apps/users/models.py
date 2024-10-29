@@ -3,9 +3,6 @@ from django.db import models
 
 from .const import MAX_NAME_LENGTH
 
-# TODO: Generalize image upload path
-# TODO: Add verbose names
-
 
 class FoodgramUser(AbstractUser):
     email = models.EmailField(
