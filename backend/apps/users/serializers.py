@@ -60,6 +60,8 @@ class SubscriptionUserSerializer(UserSerializer):
 
     Can be extended by injecting new fields into."""
 
+    class Meta(UserSerializer.Meta): ...
+
 
 class AvatarSerializer(serializers.ModelSerializer):
     avatar = Base64ImageField()
