@@ -21,6 +21,10 @@ from .util import generate_shopping_cart
 
 # TODO: Remove duplicate code
 
+SHOPPING_LIST_RESPONSE_HEADERS = {
+    'Content-Disposition': 'attachment, filename="список_покупок.txt"'
+}
+
 
 class IngredientsView(ReadOnlyModelViewSet):
     queryset = Ingredient.objects.all()
@@ -101,6 +105,7 @@ class RecipesView(ModelViewSet):
         return HttpResponse(
             generate_shopping_cart(recipes),
             content_type='text/plain charset=utf-8',
+            headers=SHOPPING_LIST_RESPONSE_HEADERS,
         )
 
     @action(
