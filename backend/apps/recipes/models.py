@@ -1,5 +1,6 @@
 from annoying.fields import AutoOneToOneField
 from django.contrib.auth import get_user_model
+from django.core.validators import MinValueValidator
 from django.db import models
 
 from .const import (
@@ -70,6 +71,9 @@ class Recipe(models.Model):
     )
     cooking_time = models.IntegerField(
         verbose_name='Время приготовления (мин.)',
+        validators=[
+            MinValueValidator(1, 'Время приготовления не может быть меньше 1!')
+        ],
     )
     text = models.TextField(
         verbose_name='Описание',
@@ -124,6 +128,9 @@ class RecipeIngredient(models.Model):
     )
     amount = models.IntegerField(
         verbose_name='Количество',
+        validators=[
+            MinValueValidator(1, 'Количество не может быть меньше 1!')
+        ],
     )
 
     class Meta:
