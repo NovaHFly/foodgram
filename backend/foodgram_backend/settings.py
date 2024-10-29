@@ -152,7 +152,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/3.2/howto/static-files/
 
 STATIC_URL = '/static/'
-if DEBUG:
+if os.getenv('USE_STATICFILES_DIRS', 'false') == 'true':
     STATICFILES_DIRS = [BASE_DIR / 'collected_static']
 else:
     STATIC_ROOT = BASE_DIR / 'collected_static'
