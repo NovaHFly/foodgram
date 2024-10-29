@@ -1,24 +1,36 @@
+from typing import TypeVar
+
 from rest_framework import serializers
 
 from common.serializers import Base64ImageField
 from common.util import generate_token
 from users import serializers as users_serializers
+from users.models import FoodgramUser
 
 from .models import Ingredient, Recipe, RecipeIngredient, ShortLink, Tag
 from .util import contains_duplicates
 
+Attrs = TypeVar('Attrs', str, int)
+
 
 class TagSerializer(serializers.ModelSerializer):
+    """Api representation of tag object.
+
+    Fields:
+    - id (int): Tag id;
+    - name (str[64]): Tag name;
+    - slug (str[32]): Tag slug.
+    """
+
     class Meta:
         model = Tag
         fields = ('id', 'name', 'slug')
         read_only_fields = ('name', 'slug')
 
-    def to_internal_value(self, data):
+    def to_internal_value(self, data: int) -> dict[str, int]:
         return {'id': data}
 
-    def validate(self, attrs):
-        # TODO: Move to id field validation
+    def validate(self, attrs: dict[Attrs]) -> dict[Attrs]:
         tag_id = attrs['id']
         if not isinstance(tag_id, int):
             raise serializers.ValidationError(f'{tag_id} is not an integer!')
@@ -30,12 +42,29 @@ class TagSerializer(serializers.ModelSerializer):
 
 
 class IngredientSerializer(serializers.ModelSerializer):
+    """Api representation of ingredient object.
+
+    Fields:
+    - id (int): Ingredient id;
+    - name (str[64]): Ingredient name;
+    - measurement_unit (str[16]): Unit in which ing. is measured.
+    """
+
     class Meta:
         model = Ingredient
         fields = ('id', 'name', 'measurement_unit')
 
 
 class RecipeIngredientSerializer(serializers.ModelSerializer):
+    """Ingredient inside the recipe.
+
+    Fields:
+    - id (int): Ingredient id;
+    - name (str[64]): Ingredient name;
+    - measurement_unit (str[16]): Unit in which ing. is measured;
+    - amount (int >= 1): Amount of ingredient inside the recipe.
+    """
+
     id = serializers.IntegerField(source='ingredient.id')
     name = serializers.CharField(
         source='ingredient.name',
@@ -50,21 +79,47 @@ class RecipeIngredientSerializer(serializers.ModelSerializer):
         model = RecipeIngredient
         fields = ('id', 'amount', 'name', 'measurement_unit')
 
-    def validate_id(self, data):
-        if not Ingredient.objects.filter(id=data).exists():
+    def validate_id(self, value: int) -> int:
+        if not Ingredient.objects.filter(id=value).exists():
             raise serializers.ValidationError(
-                f'Ingredient with id {data} does not exist!'
+                f'Ingredient with id {value} does not exist!'
             )
-        return data
+        return value
 
 
 class ShortRecipeSerializer(serializers.ModelSerializer):
+    """Shortened api representation of recipe object.
+
+    Fields:
+    - id (int): Recipe id;
+    - name (str[64]): Recipe name;
+    - image (str[Url]): Recipe picture;
+    - cooking_time (int >= 1): Time in minutes required to cook.
+    """
+
     class Meta:
         model = Recipe
         fields = ('id', 'name', 'image', 'cooking_time')
 
 
 class RecipeSerializer(serializers.ModelSerializer):
+    """Api representation of recipe object.
+
+    Fields:
+    - id (int): Recipe id;
+    - name (str[64]): Recipe name;
+    - image (str[Url]): Recipe picture;
+    - cooking_time (int >= 1): Time in minutes required to cook;
+    - ingredients (List[Ingredient]): Ingredients to use in recipe
+        - Write format: [{'id': 123, 'amount': 123}, ...];
+    - tags (List[Tag]): Recipe tags
+        - Write format: [1, 2, 3] (numbers = tag ids);
+    - author (User): Recipe author;
+    - text (str): Recipe description;
+    - is_favorited (bool): Recipe is in current user's favorite list;
+    - is_in_shopping_list (bool): Recipe is in c.u. shopping cart.
+    """
+
     tags = TagSerializer(
         many=True,
         allow_empty=False,
@@ -93,36 +148,35 @@ class RecipeSerializer(serializers.ModelSerializer):
             'cooking_time',
             'text',
         )
-        read_only_fields = ('author',)
-        extra_kwargs = {'cooking_time': {'min_value': 1}}
 
-    def validate_ingredients(self, data):
-        if contains_duplicates(data, lambda x: x['ingredient']['id']):
+    def validate_ingredients(self, value: list[dict]) -> list[dict]:
+        if contains_duplicates(value, lambda x: x['ingredient']['id']):
             raise serializers.ValidationError(
                 'Cannot add 2 of the same ingredient!'
             )
-        return data
+        return value
 
-    def validate_tags(self, data):
-        if contains_duplicates(data, lambda x: x['id']):
+    def validate_tags(self, value: list[dict]) -> list[dict]:
+        if contains_duplicates(value, lambda x: x['id']):
             raise serializers.ValidationError('Cannot add 2 of the same tag!')
-        return data
+        return value
 
-    def get_is_favorited(self, obj):
+    def get_is_favorited(self, recipe: Recipe) -> bool:
         if request := self.context.get('request', None):
             current_user = request.user
             if current_user.is_anonymous:
                 return False
-            return obj in current_user.favorited_recipes.all()
+            return recipe in current_user.favorited_recipes.all()
         return False
 
-    def get_is_in_shopping_cart(self, obj):
+    def get_is_in_shopping_cart(self, recipe: Recipe) -> bool:
         request = self.context['request']
         current_user = request.user
         if current_user.is_anonymous:
             return False
-        return obj in current_user.shopping_cart.recipes.all()
+        return recipe in current_user.shopping_cart.recipes.all()
 
+    # TODO: This
     def _write(self, validated_data, recipe=None):
         recipe_ingredients = validated_data.pop('recipe_to_ingredient', [])
         tags = validated_data.pop('tags', [])
@@ -165,17 +219,25 @@ class RecipeSerializer(serializers.ModelSerializer):
 
 
 class ShortLinkSerializer(serializers.ModelSerializer):
+    """Serializer to create new short link object
+
+    Fields:
+    - id (int) - Short link id;
+    - recipe_id (int) - Recipe id to provide short link to.
+    """
+
     recipe_id = serializers.IntegerField()
 
     class Meta:
         model = ShortLink
         fields = ('id', 'recipe_id')
 
-    def to_representation(self, instance):
+    def to_representation(self, short_link: ShortLink) -> dict[str, str]:
+        # TODO: Move to utils
         host_with_schema = (
             self.context['request'].get_raw_uri().partition('/api/')[0]
         )
-        return {'short-link': f'{host_with_schema}/s/{instance.short_url}'}
+        return {'short-link': f'{host_with_schema}/s/{short_link.short_url}'}
 
     def create(self, validated_data):
         host_with_schema = (
@@ -199,6 +261,13 @@ class ShortLinkSerializer(serializers.ModelSerializer):
 
 
 class SubscriptionUserSerializer(users_serializers.SubscriptionUserSerializer):
+    """User representation in subscriptions list.
+
+    Additional fields:
+    - recipes (List[Recipe]): Recipes, created by this user;
+    - recipes_count (int): Count of recipes created by this user.
+    """
+
     recipes = serializers.SerializerMethodField()
     recipes_count = serializers.SerializerMethodField()
 
@@ -208,12 +277,12 @@ class SubscriptionUserSerializer(users_serializers.SubscriptionUserSerializer):
             'recipes_count',
         )
 
-    def get_recipes_count(self, obj):
-        return obj.recipes.count()
+    def get_recipes_count(self, user: FoodgramUser) -> int:
+        return user.recipes.count()
 
-    def get_recipes(self, obj):
+    def get_recipes(self, user: FoodgramUser) -> list[dict]:
         request = self.context['request']
-        recipes = obj.recipes.all()
+        recipes = user.recipes.all()
 
         data = ShortRecipeSerializer(
             recipes,
@@ -231,4 +300,6 @@ class SubscriptionUserSerializer(users_serializers.SubscriptionUserSerializer):
         return data
 
 
+# Replace standart subscription serializer with one above
+# - This allows for users application to be independent from recipes
 users_serializers.SubscriptionUserSerializer = SubscriptionUserSerializer
