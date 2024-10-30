@@ -75,7 +75,7 @@ jobs:
 
           def output(data):
               with open(environ.get('GITHUB_ENV'), 'a') as f:
-                  f.write(f'IMAGES_TO_BUILD={json.dumps(images)}\n')
+                  f.write(f'IMAGES_TO_BUILD={json.dumps(data)}\n')
               sys.exit(0)
 
           changed_files = environ.get('ALL_CHANGED_FILES')
