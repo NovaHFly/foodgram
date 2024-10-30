@@ -98,15 +98,14 @@ jobs:
       - name: Output changed images names
         id: output_images
         run: |
-          echo $IMAGES_TO_BUILD
           echo "images_to_build=${IMAGES_TO_BUILD}" >> $GITHUB_OUTPUT
-          echo $GITHUB_OUTPUT
 
   build_and_push_changed_images_to_dockerhub:
     runs-on: ubuntu-latest
     if: |
       github.ref == 'refs/heads/main' &&
-      ${{ needs.changes.outputs.services != '[]' && needs.changes.outputs.services != '' }}
+      ${{ needs.get_changes_images.outputs.images_to_build }}  != '[]' &&
+      ${{ needs.get_changes_images.outputs.images_to_build }} != ''
       
     needs: get_changed_images
 
