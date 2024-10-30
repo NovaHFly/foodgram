@@ -1,5 +1,6 @@
 import re
 from collections import Counter
+from itertools import chain
 from typing import Any, Callable, Iterable
 
 from .models import Recipe
@@ -16,30 +17,30 @@ def generate_shopping_list(recipes: Iterable[Recipe]) -> str:
     Returns:
         str: Shopping list
     """
-    # TODO: Remove excess nesting
+
+    recipe_ingredients = chain(
+        recipe.recipe_to_ingredient.all() for recipe in recipes
+    )
+
     ingredients = {}
+    for recipe_ingredient in recipe_ingredients:
+        ingredient_name = recipe_ingredient.ingredient.name
+        ingredient_unit = recipe_ingredient.ingredient.measurement_unit
+        ingredient_amount = recipe_ingredient.amount
 
-    for recipe in recipes:
-        for recipe_ingredient in recipe.recipe_to_ingredient.all():
-            ingredient_name = recipe_ingredient.ingredient.name
-            ingredient_unit = recipe_ingredient.ingredient.measurement_unit
-            ingredient_amount = recipe_ingredient.amount
-
-            if ingredient_name not in ingredients:
-                ingredients[ingredient_name] = [
-                    ingredient_amount,
-                    ingredient_unit,
-                ]
-                continue
-
+        if ingredient_name in ingredients:
             ingredients[ingredient_name][0] += ingredient_amount
+            continue
 
-    out = ''
+        ingredients[ingredient_name] = [
+            ingredient_amount,
+            ingredient_unit,
+        ]
 
-    for name, (unit, amount) in ingredients.items():
-        out += f'{name} ({unit}) - {amount}\n'
-
-    return out
+    return '\n'.join(
+        f'{name} ({unit}) - {amount}'
+        for name, (unit, amount) in ingredients.items()
+    )
 
 
 def contains_duplicates(
