@@ -75,8 +75,9 @@ class RecipesView(ModelViewSet):
 
         return Response(
             ShortRecipeSerializer(
-                recipe, context=self.get_serializer_context()
-            ),
+                recipe,
+                context=self.get_serializer_context(),
+            ).data,
             status=HTTP_201_CREATED,
         )
 
@@ -102,7 +103,7 @@ class RecipesView(ModelViewSet):
         permission_classes=[IsAuthenticated],
     )
     def favorite(self, request: Request, pk: int) -> Response:
-        return self._add_to_list(request, lambda user: user.favorite_recipes)
+        return self._add_to_list(request, lambda user: user.favorited_recipes)
 
     @favorite.mapping.delete
     def unfavorite(self, request: Request, pk: int) -> Response:

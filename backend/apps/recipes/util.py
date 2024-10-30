@@ -19,7 +19,7 @@ def generate_shopping_list(recipes: Iterable[Recipe]) -> str:
     """
 
     recipe_ingredients = chain(
-        recipe.recipe_to_ingredient.all() for recipe in recipes
+        *(recipe.recipe_to_ingredient.all() for recipe in recipes)
     )
 
     ingredients = {}
