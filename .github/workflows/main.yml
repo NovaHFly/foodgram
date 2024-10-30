@@ -46,68 +46,72 @@ jobs:
 
   get_changed_images:
     runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    
     needs:
       - test_backend
-    if: github.ref == 'refs/heads/main'
 
     outputs:
-      images_to_build: ${{ steps.output_images.outputs.images_to_build }}
+      images_to_build: ${{ steps.list_changed_images.outputs.images_to_build }}
+
+    env:
+      images_to_check: 'backend,frontend'
 
     steps:
       - name: Checkout repo
         uses: actions/checkout@v3
 
       - name: Get changed files
-        id: changed-files
+        id: get_changed_files
         uses: tj-actions/changed-files@v45
         with:
           separator: ","
           files: |
-            {backend,frontend}/**
+            {${{ env.images_to_check }}}/**
 
       - name: List all changed images
+        id: list_changed_images
         env:
-          ALL_MODIFIED_FILES: ${{ steps.changed-files.outputs.all_modified_files }}
-          IMAGES_TO_CHECK: '["frontend", "backend"]'
+          ALL_MODIFIED_FILES: ${{ steps.get_changed_files.outputs.all_modified_files }}
+
         shell: python
         run: |
-          from os import environ
           import json
           import sys
+          from os import environ, system
 
-          def output(data):
-              with open(environ.get('GITHUB_ENV'), 'a') as f:
-                  f.write(f'IMAGES_TO_BUILD={json.dumps(data)}\n')
-              sys.exit(0)
+          def set_output(data):
+            os.system(f'echo "images_to_build={data}" >> $GITHUB_OUTPUT')
+            sys.exit(0)
+
+          images_to_check_env = environ.get('IMAGES_TO_CHECK')
+          if not images_to_check_env:
+            print('No images specified!')
+            set_output([])
 
           modified_files = environ.get('ALL_MODIFIED_FILES')
-          print(modified_files)
           if not modified_files:
-              output([])
+            print('No files changed in specified contexts!')
+            set_output([])
           
+          images_to_check = images_to_check_env.split(',')
           files = modified_files.split(',')
-          images_to_check = json.loads(environ.get('IMAGES_TO_CHECK'))
 
           images_to_build = [
-              image for image in images_to_check
-                  if any(file.startswith(image) for file in files)
+            image for image in images_to_check
+              if any(file.startswith(image) for file in files)
           ]
 
-          output(images_to_build)
-      
-      - name: Output changed images names
-        id: output_images
-        run: |
-          echo ${IMAGES_TO_BUILD}
-          echo "images_to_build=${IMAGES_TO_BUILD}" >> $GITHUB_OUTPUT
+          set_output(images_to_build)
 
   build_and_push_changed_images_to_dockerhub:
     runs-on: ubuntu-latest
-    needs: get_changed_images
     if: |
       github.ref == 'refs/heads/main' &&
       needs.get_changed_images.outputs.images_to_build != '' &&
       needs.get_changed_images.outputs.images_to_build != '[]'
+    
+    needs: get_changed_images
       
     strategy:
       matrix:
@@ -136,6 +140,7 @@ jobs:
 
   send_build_telegram_report:
     runs-on: ubuntu-latest
+    
     needs:
       - build_and_push_changed_images_to_dockerhub
 
@@ -158,8 +163,8 @@ jobs:
           [https://github.com/${{ github.repository }}/commit/${{ github.sha }}]
   
   deploy:
+    uses: novahfly/foodgram/.github/workflows/deploy.yml@main
     needs:
       - build_and_push_changed_images_to_dockerhub
-    uses: novahfly/foodgram/.github/workflows/deploy.yml@main
     secrets: inherit
     
