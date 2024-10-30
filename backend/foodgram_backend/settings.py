@@ -1,5 +1,6 @@
 import os
 import sys
+from distutils.util import strtobool
 from pathlib import Path
 
 from django.core.management.utils import get_random_secret_key
@@ -22,7 +23,9 @@ sys.path.append(str(APPS_PATH))
 
 SECRET_KEY = os.getenv('DJANGO_SECRET', get_random_secret_key())
 
-DEBUG = os.getenv('DJANGO_DEBUG', 'true').lower() == 'true'
+DEBUG = strtobool(os.getenv('DJANGO_DEBUG', 'true'))
+USE_SQLITE = strtobool(os.getenv('USE_SQLITE', 'true'))
+USE_LOCAL_STATICDIRS = strtobool(os.getenv('USE_LOCAL_STATICDIRS', 'false'))
 
 ALLOWED_HOSTS = os.getenv(
     'ALLOWED_HOSTS',
@@ -83,7 +86,6 @@ WSGI_APPLICATION = 'foodgram_backend.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
 
-USE_SQLITE = os.getenv('USE_SQLITE', 'true').lower() == 'true'
 if USE_SQLITE:
     DATABASES = {
         'default': {
@@ -152,7 +154,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/3.2/howto/static-files/
 
 STATIC_URL = '/static/'
-if os.getenv('USE_STATICFILES_DIRS', 'false') == 'true':
+if USE_LOCAL_STATICDIRS:
     STATICFILES_DIRS = [BASE_DIR / 'collected_static']
 else:
     STATIC_ROOT = BASE_DIR / 'collected_static'
