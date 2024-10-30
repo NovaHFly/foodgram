@@ -1,5 +1,6 @@
 import django_filters
 
+from .const import BOOLEAN_NUMBER_CHOICES
 from .models import Ingredient, Recipe, Tag
 
 
@@ -15,13 +16,15 @@ class RecipeFilter(django_filters.FilterSet):
     author = django_filters.NumberFilter(
         lookup_expr='id',
     )
-    is_favorited = django_filters.ChoiceFilter(
-        choices=[[0, False], [1, True]],
+    is_favorited = django_filters.TypedChoiceFilter(
+        choices=BOOLEAN_NUMBER_CHOICES,
         method='favorited_by_current_user',
+        coerce=int,
     )
-    is_in_shopping_cart = django_filters.ChoiceFilter(
-        choices=[[0, False], [1, True]],
+    is_in_shopping_cart = django_filters.TypedChoiceFilter(
+        choices=BOOLEAN_NUMBER_CHOICES,
         method='in_current_user_shopping_cart',
+        coerce=int,
     )
     tags = django_filters.ModelMultipleChoiceFilter(
         field_name='tags__slug',
