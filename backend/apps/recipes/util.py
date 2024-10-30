@@ -1,7 +1,10 @@
+import re
 from collections import Counter
 from typing import Any, Callable, Iterable
 
 from .models import Recipe
+
+URL_REGEX = re.compile(r'(https?:\/\/[\w\d\-_.]+)')
 
 
 def generate_shopping_list(recipes: Iterable[Recipe]) -> str:
@@ -56,3 +59,8 @@ def contains_duplicates(
     _collection = map(key, collection)
     counter = Counter(_collection)
     return counter.most_common(1)[0][1] > 1
+
+
+def extract_host_with_schema(url: str) -> str:
+    """Extract schema and hostname from url."""
+    return URL_REGEX.match(url)[0]

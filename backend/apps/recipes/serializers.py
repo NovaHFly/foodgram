@@ -9,7 +9,7 @@ from users import serializers as users_serializers
 from users.models import FoodgramUser
 
 from .models import Ingredient, Recipe, RecipeIngredient, ShortLink, Tag
-from .util import contains_duplicates
+from .util import contains_duplicates, extract_host_with_schema
 
 
 class TagSerializer(serializers.ModelSerializer):
@@ -249,16 +249,13 @@ class ShortLinkSerializer(serializers.ModelSerializer):
         fields = ['id', 'recipe_id']
 
     def to_representation(self, short_link: ShortLink) -> dict[str, str]:
-        # TODO: Move to utils
-        host_with_schema = (
-            self.context['request'].get_raw_uri().partition('/api/')[0]
-        )
+        url = self.context['request'].get_raw_uri()
+        host_with_schema = extract_host_with_schema(url)
         return {'short-link': f'{host_with_schema}/s/{short_link.short_url}'}
 
     def create(self, validated_data: dict) -> ShortLink:
-        host_with_schema = (
-            self.context['request'].get_raw_uri().partition('/api/')[0]
-        )
+        url = self.context['request'].get_raw_uri()
+        host_with_schema = extract_host_with_schema(url)
         full_url = f'{host_with_schema}/recipes/{validated_data["recipe_id"]}/'
         while True:
             short_url = generate_token()
