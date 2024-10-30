@@ -82,6 +82,7 @@ jobs:
               sys.exit(0)
 
           changed_files = environ.get('ALL_CHANGED_FILES')
+          print(changed_files)
           if not changed_files:
               output([])
           
@@ -98,6 +99,7 @@ jobs:
       - name: Output changed images names
         id: output_images
         run: |
+          echo ${IMAGES_TO_BUILD}
           echo "images_to_build=${IMAGES_TO_BUILD}" >> $GITHUB_OUTPUT
 
   build_and_push_changed_images_to_dockerhub:
