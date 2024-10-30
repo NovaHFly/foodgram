@@ -106,7 +106,7 @@ jobs:
       github.ref == 'refs/heads/main' &&
       ${{
         needs.get_changed_images.outputs.images_to_build != '[]' &&
-        needs.get_changed_images.outputs.images_to_build }} != ''
+        needs.get_changed_images.outputs.images_to_build != ''
       }}
       
     needs: get_changed_images
