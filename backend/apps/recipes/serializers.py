@@ -32,7 +32,7 @@ class TagSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(f'{tag_id} is not an integer!')
         if not Tag.objects.filter(id=tag_id).exists():
             raise serializers.ValidationError(
-                f'Tag with id {tag_id} does not exist!'
+                f'Тег с id {tag_id} не существует!'
             )
         return attrs
 
@@ -78,7 +78,7 @@ class RecipeIngredientSerializer(serializers.ModelSerializer):
     def validate_id(self, value: int) -> int:
         if not Ingredient.objects.filter(id=value).exists():
             raise serializers.ValidationError(
-                f'Ingredient with id {value} does not exist!'
+                f'Ингредиент с id {value} не существует!'
             )
         return value
 
@@ -148,13 +148,15 @@ class RecipeSerializer(serializers.ModelSerializer):
     def validate_ingredients(self, value: list[dict]) -> list[dict]:
         if contains_duplicates(value, lambda x: x['ingredient']['id']):
             raise serializers.ValidationError(
-                'Cannot add 2 of the same ingredient!'
+                'Нельзя добавить 2 одинаковых ингредиента!'
             )
         return value
 
     def validate_tags(self, value: list[dict]) -> list[dict]:
         if contains_duplicates(value, lambda x: x['id']):
-            raise serializers.ValidationError('Cannot add 2 of the same tag!')
+            raise serializers.ValidationError(
+                'Нельзя присвоить 2 одинаковых тега!'
+            )
         return value
 
     def get_is_favorited(self, recipe: Recipe) -> bool:

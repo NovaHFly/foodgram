@@ -124,13 +124,13 @@ class AuthSerializer(serializers.Serializer):
 
     def validate_email(self, email: str) -> str:
         if not FoodgramUser.objects.filter(email=email).exists():
-            raise serializers.ValidationError('Invalid email or password!')
+            raise serializers.ValidationError('Неверный email или пароль!')
         return email
 
     def validate(self, attrs: dict) -> dict:
         user = self.user = FoodgramUser.objects.get(email=attrs['email'])
         if not user.check_password(attrs['password']):
-            raise serializers.ValidationError('Invalid email or password!')
+            raise serializers.ValidationError('Неверный email или пароль!')
         return attrs
 
 
@@ -151,7 +151,7 @@ class PasswordChangeSerializer(serializers.ModelSerializer):
 
     def validate_current_password(self, password: str) -> str:
         if not self.instance.check_password(password):
-            raise serializers.ValidationError('Invalid password!')
+            raise serializers.ValidationError('Неверный пароль!')
         return password
 
     def validate_new_password(self, password: str) -> str:
