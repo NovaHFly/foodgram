@@ -13,14 +13,6 @@ from .util import contains_duplicates, extract_host_with_schema
 
 
 class TagSerializer(serializers.ModelSerializer):
-    """Api representation of tag object.
-
-    Fields:
-        id (int): Tag id.
-        name (str[64]): Tag name.
-        slug (str[32]): Tag slug.
-    """
-
     class Meta:
         model = Tag
         fields = ['id', 'name', 'slug']
@@ -41,29 +33,12 @@ class TagSerializer(serializers.ModelSerializer):
 
 
 class IngredientSerializer(serializers.ModelSerializer):
-    """Api representation of ingredient object.
-
-    Fields:
-        id (int): Ingredient id.
-        name (str[64]): Ingredient name.
-        measurement_unit (str[16]): Unit in which ing. is measured.
-    """
-
     class Meta:
         model = Ingredient
         fields = ['id', 'name', 'measurement_unit']
 
 
 class RecipeIngredientSerializer(serializers.ModelSerializer):
-    """Ingredient inside the recipe.
-
-    Fields:
-        id (int): Ingredient id.
-        name (str[64]): Ingredient name.
-        measurement_unit (str[16]): Unit in which ing. is measured.
-        amount (int >= 1): Amount of ingredient inside the recipe.
-    """
-
     id = serializers.IntegerField(source='ingredient.id')
     name = serializers.CharField(
         source='ingredient.name',
@@ -87,38 +62,12 @@ class RecipeIngredientSerializer(serializers.ModelSerializer):
 
 
 class ShortRecipeSerializer(serializers.ModelSerializer):
-    """Shortened api representation of recipe object.
-
-    Fields:
-        id (int): Recipe id.
-        name (str[64]): Recipe name.
-        image (str[Url]): Recipe picture.
-        cooking_time (int >= 1): Time in minutes required to cook.
-    """
-
     class Meta:
         model = Recipe
         fields = ['id', 'name', 'image', 'cooking_time']
 
 
 class RecipeSerializer(serializers.ModelSerializer):
-    """Api representation of recipe object.
-
-    Fields:
-        id (int): Recipe id.
-        name (str[64]): Recipe name.
-        image (str[Url]): Recipe picture.
-        cooking_time (int >= 1): Time in minutes required to cook.
-        ingredients (List[Ingredient]): Ingredients to use in recipe
-            Ingredients write format: [{'id': 123, 'amount': 123}, ...].
-        tags (List[Tag]): Recipe tags
-            Tags write format: [1, 2, 3] (numbers = tag ids).
-        author (User): Recipe author.
-        text (str): Recipe description.
-        is_favorited (bool): Recipe is in current user's favorite list.
-        is_in_shopping_list (bool): Recipe is in c.u. shopping cart.
-    """
-
     tags = TagSerializer(
         many=True,
         allow_empty=False,
@@ -235,13 +184,6 @@ class RecipeSerializer(serializers.ModelSerializer):
 
 
 class ShortLinkSerializer(serializers.ModelSerializer):
-    """Serializer to create new short link object
-
-    Fields:
-        id (int) - Short link id.
-        recipe_id (int) - Recipe id to provide short link to.
-    """
-
     recipe_id = serializers.IntegerField()
 
     class Meta:
@@ -274,13 +216,6 @@ class ShortLinkSerializer(serializers.ModelSerializer):
 
 
 class SubscriptionUserSerializer(users_serializers.SubscriptionUserSerializer):
-    """User representation in subscriptions list.
-
-    Additional fields:
-        recipes (List[Recipe]): Recipes, created by this user.
-        recipes_count (int): Count of recipes created by this user.
-    """
-
     recipes = serializers.SerializerMethodField()
     recipes_count = serializers.SerializerMethodField()
 

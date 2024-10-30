@@ -7,17 +7,6 @@ from .models import FoodgramUser
 
 
 class CreateUserSerializer(serializers.ModelSerializer):
-    """Contains fields needed to register new user.
-
-    Fields:
-        id (int): User id.
-        email (str[254]): User email.
-        username (str[150]): User on-site name.
-        first_name (str[64]): User first name.
-        last_name (str[64]): User last name.
-        password (str[Password]): User password.
-    """
-
     class Meta:
         model = FoodgramUser
         fields = [
@@ -43,18 +32,6 @@ class CreateUserSerializer(serializers.ModelSerializer):
 
 
 class UserSerializer(serializers.ModelSerializer):
-    """Api representation of user object.
-
-    Fields:
-        id (int): User id.
-        email (str[254]): User email.
-        username (str[150]): User on-site name.
-        first_name (str[64]): User first name.
-        last_name (str[64]): User last name.
-        avatar (str[Url]): Url to user avatar.
-        is_subscribed (bool): Current user is subscribed to this user.
-    """
-
     is_subscribed = serializers.SerializerMethodField()
 
     class Meta:
@@ -94,12 +71,6 @@ class SubscriptionUserSerializer(UserSerializer):
 
 
 class AvatarSerializer(serializers.ModelSerializer):
-    """Serializer to set user avatar.
-
-    Fields:
-        avatar: str[Base64 Image]: Base64-encoded image to use as avatar.
-    """
-
     avatar = Base64ImageField()
 
     class Meta:
@@ -112,13 +83,6 @@ class AvatarSerializer(serializers.ModelSerializer):
 
 
 class AuthSerializer(serializers.Serializer):
-    """Authentication serializer.
-
-    Fields:
-        email (str[254]): User email.
-        password (str[Password]): User password.
-    """
-
     email = serializers.EmailField()
     password = serializers.CharField()
 
@@ -135,13 +99,6 @@ class AuthSerializer(serializers.Serializer):
 
 
 class PasswordChangeSerializer(serializers.ModelSerializer):
-    """Serializer to change user password.
-
-    Fields:
-        current_password (str[Password]): Current user password.
-        new_password (str[Password]): New user password.
-    """
-
     new_password = serializers.CharField()
     current_password = serializers.CharField()
 
