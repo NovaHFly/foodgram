@@ -71,8 +71,18 @@ jobs:
         run: |
           from os import environ
           import json
+          import sys
 
-          files = environ.get('ALL_CHANGED_FILES').split(',')
+          def output(data):
+              with open(environ.get('GITHUB_ENV'), 'a') as f:
+                  f.write(f'IMAGES_TO_BUILD={json.dumps(images)}\n')
+              sys.exit(0)
+
+          changed_files = environ.get('ALL_CHANGED_FILES')
+          if not changed_files:
+              def output([])
+          
+          files = files.split(',')
           images_to_check = json.loads(environ.get('IMAGES_TO_CHECK'))
 
           images_to_build = [
@@ -80,8 +90,7 @@ jobs:
                   if any(file.startswith(image) for file in files)
           ]
 
-          with open(environ.get('GITHUB_ENV'), 'a') as f:
-              f.write('IMAGES_TO_BUILD=' + json.dumps(images) + '\n')
+          output(images_to_build)
       
       - name: Output changed images names
         run: |
