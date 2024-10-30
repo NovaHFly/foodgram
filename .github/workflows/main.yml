@@ -77,19 +77,19 @@ jobs:
         shell: python
         run: |
           import json
+          import os
           import sys
-          from os import environ, system
 
           def set_output(data):
             os.system(f'echo "images_to_build={data}" >> $GITHUB_OUTPUT')
             sys.exit(0)
 
-          images_to_check_env = environ.get('images_to_check')
+          images_to_check_env = os.environ.get('images_to_check')
           if not images_to_check_env:
             print('No images specified!')
             set_output([])
 
-          modified_files = environ.get('all_modified_files')
+          modified_files = os.environ.get('all_modified_files')
           if not modified_files:
             print('No files changed in specified contexts!')
             set_output([])
