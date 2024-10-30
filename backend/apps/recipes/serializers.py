@@ -1,3 +1,7 @@
+from typing import Callable
+
+from django.db.models import Model
+from django.db.models.manager import RelatedManager
 from rest_framework import serializers
 
 from common.serializers import Base64ImageField
@@ -159,23 +163,32 @@ class RecipeSerializer(serializers.ModelSerializer):
             )
         return value
 
-    def get_is_favorited(self, recipe: Recipe) -> bool:
-        if request := self.context.get('request', None):
-            current_user = request.user
-            if current_user.is_anonymous:
-                return False
-            return recipe in current_user.favorited_recipes.all()
-        return False
-
-    def get_is_in_shopping_cart(self, recipe: Recipe) -> bool:
-        request = self.context['request']
-        current_user = request.user
+    def _check_instance_in_user_list(
+        self,
+        recipe: Recipe,
+        get_related_manager: Callable[[Model], RelatedManager],
+    ) -> bool:
+        if not (request := self.context.get('request', None)):
+            return False
+        current_user: FoodgramUser = request.user
         if current_user.is_anonymous:
             return False
-        return recipe in current_user.shopping_cart.recipes.all()
+        related_manager = get_related_manager(current_user)
+        return recipe in related_manager.all()
 
-    # TODO: This
-    def _write(self, validated_data, recipe=None):
+    def get_is_favorited(self, recipe: Recipe) -> bool:
+        return self._check_instance_in_user_list(
+            recipe,
+            lambda user: user.favorited_recipes,
+        )
+
+    def get_is_in_shopping_cart(self, recipe: Recipe) -> bool:
+        return self._check_instance_in_user_list(
+            recipe,
+            lambda user: user.shopping_cart.recipes,
+        )
+
+    def _write(self, validated_data: dict, recipe: Recipe = None) -> Recipe:
         recipe_ingredients = validated_data.pop('recipe_to_ingredient', [])
         tags = validated_data.pop('tags', [])
         image = validated_data.pop('image', None)
@@ -189,14 +202,14 @@ class RecipeSerializer(serializers.ModelSerializer):
         if recipe_ingredients:
             recipe.ingredients.clear()
 
-        for recipe_ingredient in recipe_ingredients:
-            ingredient = Ingredient.objects.get(
-                id=recipe_ingredient['ingredient']['id']
-            )
-            recipe.ingredients.add(
-                ingredient,
-                through_defaults={'amount': recipe_ingredient['amount']},
-            )
+            for recipe_ingredient in recipe_ingredients:
+                ingredient = Ingredient.objects.get(
+                    id=recipe_ingredient['ingredient']['id']
+                )
+                recipe.ingredients.add(
+                    ingredient,
+                    through_defaults={'amount': recipe_ingredient['amount']},
+                )
 
         if tags:
             recipe.tags.set(Tag.objects.get(id=tag['id']) for tag in tags)
