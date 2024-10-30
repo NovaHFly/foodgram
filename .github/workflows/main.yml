@@ -80,7 +80,7 @@ jobs:
 
           changed_files = environ.get('ALL_CHANGED_FILES')
           if not changed_files:
-              def output([])
+              output([])
           
           files = files.split(',')
           images_to_check = json.loads(environ.get('IMAGES_TO_CHECK'))
