@@ -1,4 +1,5 @@
 import django_filters
+from django.db.models import QuerySet
 
 from .const import BOOLEAN_NUMBER_CHOICES
 from .models import Ingredient, Recipe, Tag
@@ -36,19 +37,40 @@ class RecipeFilter(django_filters.FilterSet):
         model = Recipe
         fields = ['author', 'tags', 'is_favorited', 'is_in_shopping_cart']
 
-    # TODO: Duplicate code
-    def favorited_by_current_user(self, queryset, name, value):
+    def _check_current_user_in_lookup(
+        self,
+        lookup: str,
+        queryset: QuerySet,
+        value: int,
+    ) -> QuerySet:
         if self.request.user.is_anonymous:
             return queryset.none()
-        value = int(value)
-        if not value:
-            return queryset.exclude(favorited_by_users__in=[self.request.user])
-        return queryset.filter(favorited_by_users__in=[self.request.user])
 
-    def in_current_user_shopping_cart(self, queryset, name, value):
-        if self.request.user.is_anonymous:
-            return queryset.none()
-        value = int(value)
+        lookup_params = {lookup + '__in': [self.request.user]}
         if not value:
-            return queryset.exclude(shoppingcart__user__in=[self.request.user])
-        return queryset.filter(shoppingcart__user__in=[self.request.user])
+            return queryset.exclude(**lookup_params)
+        return queryset.filter(**lookup_params)
+
+    def favorited_by_current_user(
+        self,
+        queryset: QuerySet,
+        name: str,
+        value: int,
+    ) -> QuerySet:
+        return self._check_current_user_in_lookup(
+            'favorited_by_users',
+            queryset,
+            value,
+        )
+
+    def in_current_user_shopping_cart(
+        self,
+        queryset: QuerySet,
+        name: str,
+        value: int,
+    ) -> QuerySet:
+        return self._check_current_user_in_lookup(
+            'shoppingcart__user',
+            queryset,
+            value,
+        )
