@@ -63,8 +63,7 @@ jobs:
         with:
           separator: ","
           files: |
-            frontend/*
-            backend/*
+            {backend,frontend}/**
 
       - name: List all changed images
         env:
