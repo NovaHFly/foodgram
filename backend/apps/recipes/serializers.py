@@ -1,7 +1,6 @@
 from typing import Callable
 
-from django.db.models import Model
-from django.db.models.manager import RelatedManager
+from django.db.models import Manager, Model
 from rest_framework import serializers
 
 from common.serializers import Base64ImageField
@@ -129,7 +128,7 @@ class RecipeSerializer(serializers.ModelSerializer):
         allow_empty=False,
         source='recipe_to_ingredient',
     )
-    image = Base64ImageField()
+    image = Base64ImageField(required=False)
     is_favorited = serializers.SerializerMethodField()
     is_in_shopping_cart = serializers.SerializerMethodField()
     author = users_serializers.UserSerializer(read_only=True)
@@ -163,10 +162,18 @@ class RecipeSerializer(serializers.ModelSerializer):
             )
         return value
 
+    def validate(self, attrs: dict) -> dict:
+        if not self.instance:
+            if 'image' not in attrs:
+                raise serializers.ValidationError(
+                    'Не загружена картинка рецепта!'
+                )
+        return attrs
+
     def _check_instance_in_user_list(
         self,
         recipe: Recipe,
-        get_related_manager: Callable[[Model], RelatedManager],
+        get_related_manager: Callable[[Model], Manager],
     ) -> bool:
         if not (request := self.context.get('request', None)):
             return False
@@ -199,20 +206,18 @@ class RecipeSerializer(serializers.ModelSerializer):
             for key, value in validated_data.items():
                 setattr(recipe, key, value)
 
-        if recipe_ingredients:
-            recipe.ingredients.clear()
+        recipe.ingredients.clear()
 
-            for recipe_ingredient in recipe_ingredients:
-                ingredient = Ingredient.objects.get(
-                    id=recipe_ingredient['ingredient']['id']
-                )
-                recipe.ingredients.add(
-                    ingredient,
-                    through_defaults={'amount': recipe_ingredient['amount']},
-                )
+        for recipe_ingredient in recipe_ingredients:
+            ingredient = Ingredient.objects.get(
+                id=recipe_ingredient['ingredient']['id']
+            )
+            recipe.ingredients.add(
+                ingredient,
+                through_defaults={'amount': recipe_ingredient['amount']},
+            )
 
-        if tags:
-            recipe.tags.set(Tag.objects.get(id=tag['id']) for tag in tags)
+        recipe.tags.set(Tag.objects.get(id=tag['id']) for tag in tags)
 
         if image:
             if recipe.image:
