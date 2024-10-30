@@ -19,8 +19,8 @@ sys.path.append(str(APPS_PATH))
 
 SECRET_KEY = os.getenv('DJANGO_SECRET', get_random_secret_key())
 
-DEBUG = strtobool(os.getenv('DJANGO_DEBUG', 'true'))
-USE_SQLITE = strtobool(os.getenv('USE_SQLITE', 'true'))
+DEBUG = strtobool(os.getenv('DJANGO_DEBUG', 'false'))
+USE_SQLITE = strtobool(os.getenv('USE_SQLITE', 'false'))
 USE_LOCAL_STATICDIRS = strtobool(os.getenv('USE_LOCAL_STATICDIRS', 'false'))
 
 ALLOWED_HOSTS = os.getenv(
