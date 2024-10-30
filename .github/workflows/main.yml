@@ -118,6 +118,6 @@ jobs:
           [https://github.com/${{ github.repository }}/commit/${{ github.sha }}]
   
   deploy:
-    uses: novahfly/foodgram/.github/workflows/deploy.yml
+    uses: novahfly/foodgram/.github/workflows/deploy.yml@main
     secrets: inherit
     
