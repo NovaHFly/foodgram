@@ -50,6 +50,9 @@ jobs:
       - test_backend
     if: github.ref == 'refs/heads/main'
 
+    outputs:
+      images_to_build: ${{ steps.output_images.images_to_build }}
+
     steps:
       - name: Checkout repo
         uses: actions/checkout@v3
@@ -93,17 +96,20 @@ jobs:
           output(images_to_build)
       
       - name: Output changed images names
+        id: output_images
         run: |
           echo "IMAGES_TO_BUILD=${IMAGES_TO_BUILD}" >> $GITHUB_OUTPUT
 
   build_and_push_changed_images_to_dockerhub:
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main'
+    if: |
+      github.ref == 'refs/heads/main' &&
+      ${{ needs.get_changed_images.outputs.images_to_build != '[]' }}
     needs: get_changed_images
 
     strategy:
       matrix:
-        image: ${{ fromJson( needs.get_changed_images.outputs.IMAGES_TO_BUILD ) }}
+        image: ${{ fromJson( needs.get_changed_images.outputs.images_to_build ) }}
 
     steps:
       - name: Checkout repo
