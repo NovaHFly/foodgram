@@ -1,3 +1,6 @@
+from typing import Callable
+
+from django.db.models import Manager, Model
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
@@ -24,8 +27,6 @@ from .serializers import (
 )
 from .util import generate_shopping_list
 
-# TODO: Remove duplicate code
-
 
 class IngredientsView(ReadOnlyModelViewSet):
     queryset = Ingredient.objects.all()
@@ -46,7 +47,6 @@ class TagsView(ReadOnlyModelViewSet):
 class RecipesView(ModelViewSet):
     queryset = Recipe.objects.all()
     serializer_class = RecipeSerializer
-    # TODO: Replace with constants
     http_method_names = ['get', 'post', 'patch', 'delete', 'head', 'options']
     permission_classes = [IsAuthorOrReadOnly]
     filter_backends = [DjangoFilterBackend]
@@ -58,37 +58,58 @@ class RecipesView(ModelViewSet):
     def partial_update(self, request: Request, *args, **kwargs) -> Response:
         return super().update(request, *args, **kwargs)
 
+    def _add_to_list(
+        self,
+        request: Request,
+        get_related_manager: Callable[[Model], Manager],
+    ) -> Response:
+        recipe = self.get_object()
+        current_user = request.user
+
+        related_manager = get_related_manager(current_user)
+
+        if recipe in related_manager.all():
+            return Response(status=HTTP_400_BAD_REQUEST)
+
+        related_manager.add(recipe)
+
+        return Response(
+            ShortRecipeSerializer(
+                recipe, context=self.get_serializer_context()
+            ),
+            status=HTTP_201_CREATED,
+        )
+
+    def _remove_from_list(
+        self,
+        request: Request,
+        get_related_manager: Callable[[Model], Manager],
+    ) -> Response:
+        recipe = self.get_object()
+        current_user = request.user
+
+        related_manager = get_related_manager(current_user)
+
+        if recipe not in related_manager.all():
+            return Response(status=HTTP_400_BAD_REQUEST)
+
+        related_manager.remove(recipe)
+        return Response(status=HTTP_204_NO_CONTENT)
+
     @action(
         detail=True,
         methods=['post'],
         permission_classes=[IsAuthenticated],
     )
     def favorite(self, request: Request, pk: int) -> Response:
-        recipe = self.get_object()
-        user = request.user
-
-        if recipe in user.favorited_recipes.all():
-            return Response(status=HTTP_400_BAD_REQUEST)
-
-        user.favorited_recipes.add(recipe)
-        return Response(
-            ShortRecipeSerializer(
-                recipe,
-                context=self.get_serializer_context(),
-            ).data,
-            status=HTTP_201_CREATED,
-        )
+        return self._add_to_list(request, lambda user: user.favorite_recipes)
 
     @favorite.mapping.delete
     def unfavorite(self, request: Request, pk: int) -> Response:
-        recipe = self.get_object()
-        user = request.user
-
-        if recipe not in user.favorited_recipes.all():
-            return Response(status=HTTP_400_BAD_REQUEST)
-
-        user.favorited_recipes.remove(recipe)
-        return Response(status=HTTP_204_NO_CONTENT)
+        return self._remove_from_list(
+            request,
+            lambda user: user.favorited_recipes,
+        )
 
     @action(
         detail=True,
@@ -125,33 +146,17 @@ class RecipesView(ModelViewSet):
         permission_classes=[IsAuthenticated],
     )
     def add_to_shopping_cart(self, request: Request, pk: int) -> Response:
-        recipe = self.get_object()
-        current_user = request.user
-
-        if recipe in current_user.shopping_cart.recipes.all():
-            return Response(status=HTTP_400_BAD_REQUEST)
-
-        current_user.shopping_cart.recipes.add(recipe)
-        return Response(
-            ShortRecipeSerializer(
-                recipe,
-                context=self.get_serializer_context(),
-            ).data,
-            status=HTTP_201_CREATED,
+        return self._add_to_list(
+            request,
+            lambda user: user.shopping_cart.recipes,
         )
 
     @add_to_shopping_cart.mapping.delete
-    def remove_from_shopping_cart(
-        self, request: Request, pk: int
-    ) -> Response:
-        recipe = self.get_object()
-        current_user = request.user
-
-        if recipe not in current_user.shopping_cart.recipes.all():
-            return Response(status=HTTP_400_BAD_REQUEST)
-
-        current_user.shopping_cart.recipes.remove(recipe)
-        return Response(status=HTTP_204_NO_CONTENT)
+    def remove_from_shopping_cart(self, request: Request, pk: int) -> Response:
+        return self._remove_from_list(
+            request,
+            lambda user: user.shopping_cart.recipes,
+        )
 
 
 @api_view(['get'])
