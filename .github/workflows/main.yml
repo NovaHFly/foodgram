@@ -80,12 +80,12 @@ jobs:
                   f.write(f'IMAGES_TO_BUILD={json.dumps(data)}\n')
               sys.exit(0)
 
-          changed_files = environ.get('ALL_MODIFIED_FILES')
-          print(changed_files)
-          if not changed_files:
+          modified_files = environ.get('ALL_MODIFIED_FILES')
+          print(modified_files)
+          if not modified_files:
               output([])
           
-          files = files.split(',')
+          files = modified_files.split(',')
           images_to_check = json.loads(environ.get('IMAGES_TO_CHECK'))
 
           images_to_build = [
