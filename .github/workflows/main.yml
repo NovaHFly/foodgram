@@ -114,7 +114,6 @@ jobs:
           envkey_ALLOWED_HOSTS: ${{ secrets.ALLOWED_HOSTS }}
           envkey_DJANGO_SECRET: ${{ secrets.DJANGO_SECRET }}
           envkey_DJANGO_DEBUG: ${{ secrets.DJANGO_DEBUG }}
-          envkey_USE_SQLITE: ${{ secrets.USE_SQLITE }}
       
       - name: Copy production config to server via ssh
         uses: appleboy/scp-action@master
