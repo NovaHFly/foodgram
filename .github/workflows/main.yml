@@ -98,7 +98,7 @@ jobs:
       - name: Output changed images names
         id: output_images
         run: |
-          echo "IMAGES_TO_BUILD=${IMAGES_TO_BUILD}" >> $GITHUB_OUTPUT
+          echo "images_to_build=${IMAGES_TO_BUILD}" >> $GITHUB_OUTPUT
 
   build_and_push_changed_images_to_dockerhub:
     runs-on: ubuntu-latest
