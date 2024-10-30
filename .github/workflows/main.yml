@@ -104,8 +104,8 @@ jobs:
     runs-on: ubuntu-latest
     if: |
       github.ref == 'refs/heads/main' &&
-      ${{ needs.get_changes_images.outputs.images_to_build }}  != '[]' &&
-      ${{ needs.get_changes_images.outputs.images_to_build }} != ''
+      ${{ needs.get_changed_images.outputs.images_to_build }} != '[]' &&
+      ${{ needs.get_changed_images.outputs.images_to_build }} != ''
       
     needs: get_changed_images
 
