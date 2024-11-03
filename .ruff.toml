@@ -1,6 +1,5 @@
-
 line-length = 79
-exclude = [".venv/", "tests/", "*/migrations/"]
+exclude = [".venv/", "*/migrations/"]
 
 [lint]
 extend-select = ["I", "E", "W", "F", "C"]
