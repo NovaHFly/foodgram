@@ -31,3 +31,8 @@ class FoodgramUser(AbstractUser):
 
     def __str__(self) -> str:
         return f'{self.username} [{self.email}]'
+
+    class Meta:
+        verbose_name = 'Пользователь'
+        verbose_name_plural = 'Пользователи'
+        ordering = ['-username']
