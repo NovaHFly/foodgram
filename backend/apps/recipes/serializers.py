@@ -77,7 +77,6 @@ class RecipeSerializer(serializers.ModelSerializer):
         source='recipe_to_ingredient',
     )
     image = Base64ImageField(required=False)
-    is_favorited = serializers.SerializerMethodField()
     is_in_shopping_cart = serializers.SerializerMethodField()
     author = users_serializers.UserSerializer(read_only=True)
 
@@ -87,7 +86,6 @@ class RecipeSerializer(serializers.ModelSerializer):
             'id',
             'tags',
             'ingredients',
-            'is_favorited',
             'is_in_shopping_cart',
             'name',
             'author',
@@ -130,12 +128,6 @@ class RecipeSerializer(serializers.ModelSerializer):
             return False
         related_manager = get_related_manager(current_user)
         return recipe in related_manager.all()
-
-    def get_is_favorited(self, recipe: Recipe) -> bool:
-        return self._check_instance_in_user_list(
-            recipe,
-            lambda user: user.favorited_recipes,
-        )
 
     def get_is_in_shopping_cart(self, recipe: Recipe) -> bool:
         return self._check_instance_in_user_list(

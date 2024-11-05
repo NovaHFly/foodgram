@@ -98,21 +98,6 @@ class RecipesView(ModelViewSet):
 
     @action(
         detail=True,
-        methods=['post'],
-        permission_classes=[IsAuthenticated],
-    )
-    def favorite(self, request: Request, pk: int) -> Response:
-        return self._add_to_list(request, lambda user: user.favorited_recipes)
-
-    @favorite.mapping.delete
-    def unfavorite(self, request: Request, pk: int) -> Response:
-        return self._remove_from_list(
-            request,
-            lambda user: user.favorited_recipes,
-        )
-
-    @action(
-        detail=True,
         methods=['get'],
         url_path='get-link',
         permission_classes=[AllowAny],

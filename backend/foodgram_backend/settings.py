@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     'short_link',
     'recipes',
     'subscriptions',
+    'favorites',
 ]
 
 MIDDLEWARE = [

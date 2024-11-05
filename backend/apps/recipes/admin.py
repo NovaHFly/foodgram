@@ -39,12 +39,11 @@ class RecipeAdmin(admin.ModelAdmin):
     list_display = [
         'name',
         'author',
-        'favorite_count',
     ]
     list_display_links = ['name']
     search_fields = ['name', 'author']
     list_filter = ['tags']
-    filter_horizontal = ['tags', 'favorited_by_users']
+    filter_horizontal = ['tags']
     inlines = [RecipeIngredientInline]
 
 

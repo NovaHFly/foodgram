@@ -93,12 +93,6 @@ class Recipe(models.Model):
         through='RecipeIngredient',
         verbose_name='Ингредиенты',
     )
-    favorited_by_users = models.ManyToManyField(
-        User,
-        related_name='favorited_recipes',
-        blank=True,
-        verbose_name='В списках избранного',
-    )
 
     class Meta:
         verbose_name = 'Рецепт'
@@ -107,12 +101,6 @@ class Recipe(models.Model):
 
     def __str__(self) -> str:
         return f'{self.name} - {self.author}'
-
-    @property
-    def favorite_count(self) -> int:
-        return self.favorited_by_users.count()
-
-    favorite_count.fget.short_description = 'Раз добавлен в избранное'
 
 
 class RecipeIngredient(models.Model):
