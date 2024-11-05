@@ -27,4 +27,4 @@ class UserFavorites(models.Model):
         ordering = ['user__username']
 
     def __str__(self) -> str:
-        return f'Список избранного {self.user.username}'
+        return f'Избранное {self.user.username}'

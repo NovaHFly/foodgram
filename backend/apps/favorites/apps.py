@@ -7,5 +7,5 @@ class FavoritesConfig(AppConfig):
     verbose_name = 'Избранное'
 
     def ready(self) -> None:
-        # Need these imports to execute code inside
+        # Need these imports to execute code inside modules
         from . import filters, serializers  # noqa: F401

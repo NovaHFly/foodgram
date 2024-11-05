@@ -5,5 +5,6 @@ from django.contrib.auth.admin import UserAdmin
 User = get_user_model()
 
 UserAdmin.fieldsets += (('Extra fields', {'fields': ('avatar',)}),)
+UserAdmin.inlines = []
 
 admin.site.register(User, UserAdmin)
