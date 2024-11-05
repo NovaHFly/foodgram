@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'common',
     'users',
     'recipes',
+    'subscriptions',
 ]
 
 MIDDLEWARE = [

@@ -51,23 +51,8 @@ class UserSerializer(serializers.ModelSerializer):
             current_user = request.user
             if current_user.is_anonymous:
                 return False
-            return user in current_user.subscriptions.all()
+            return user in current_user.subscription_list.users.all()
         return False
-
-
-class SubscriptionUserSerializer(UserSerializer):
-    """Api representation of user in subscriptions list.
-
-    Can be replaced with extended version:
-    ```
-    users.serializers.SubscriptionUserSerializer = ...
-    ```
-    Base version does not provide any functionality different
-    from UserSerializer.
-    This serializer is used to allow additional data be
-    shown when viewing user on subscriptions list without altering
-    UserSerializer.
-    """
 
 
 class AvatarSerializer(serializers.ModelSerializer):

@@ -20,7 +20,6 @@ from .serializers import (
     AvatarSerializer,
     CreateUserSerializer,
     PasswordChangeSerializer,
-    SubscriptionUserSerializer,
     UserSerializer,
 )
 
@@ -85,58 +84,6 @@ class UsersView(
         )
         serializer.is_valid(raise_exception=True)
         serializer.save()
-        return Response(status=status.HTTP_204_NO_CONTENT)
-
-    @action(
-        detail=False,
-        methods=['get'],
-        permission_classes=[IsAuthenticated],
-    )
-    def subscriptions(self, request: Request) -> Response:
-        paginated_data = self.paginate_queryset(
-            SubscriptionUserSerializer(
-                request.user.subscriptions.all(),
-                many=True,
-                context=self.get_serializer_context(),
-            ).data
-        )
-        return self.get_paginated_response(paginated_data)
-
-    @action(
-        detail=True,
-        methods=['post'],
-        permission_classes=[IsAuthenticated],
-    )
-    def subscribe(self, request: Request, pk: int) -> Response:
-        user_to_subscribe = self.get_object()
-        current_user = request.user
-
-        if current_user == user_to_subscribe:
-            return Response(status=status.HTTP_400_BAD_REQUEST)
-
-        if user_to_subscribe in current_user.subscriptions.all():
-            return Response(status=status.HTTP_400_BAD_REQUEST)
-
-        current_user.subscriptions.add(user_to_subscribe)
-
-        return Response(
-            SubscriptionUserSerializer(
-                user_to_subscribe,
-                context=self.get_serializer_context(),
-            ).data,
-            status=status.HTTP_201_CREATED,
-        )
-
-    @subscribe.mapping.delete
-    def unsubscribe(self, request: Request, pk: int) -> Response:
-        current_user = request.user
-        user_to_unsubscribe = self.get_object()
-
-        if user_to_unsubscribe not in current_user.subscriptions.all():
-            return Response(status=status.HTTP_400_BAD_REQUEST)
-
-        current_user.subscriptions.remove(user_to_unsubscribe)
-
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 

@@ -213,39 +213,3 @@ class ShortLinkSerializer(serializers.ModelSerializer):
         )
 
         return short_link
-
-
-class SubscriptionUserSerializer(users_serializers.SubscriptionUserSerializer):
-    recipes = serializers.SerializerMethodField()
-    recipes_count = serializers.SerializerMethodField()
-
-    class Meta(users_serializers.SubscriptionUserSerializer.Meta):
-        fields = users_serializers.SubscriptionUserSerializer.Meta.fields
-        fields += ('recipes', 'recipes_count')
-
-    def get_recipes_count(self, user: FoodgramUser) -> int:
-        return user.recipes.count()
-
-    def get_recipes(self, user: FoodgramUser) -> list[dict]:
-        request = self.context['request']
-        recipes = user.recipes.all()
-
-        data = ShortRecipeSerializer(
-            recipes,
-            many=True,
-            context=self.context,
-        ).data
-
-        if (
-            'recipes_limit' in request.query_params
-            and request.query_params['recipes_limit'].isdigit()
-        ):
-            limit = int(request.query_params['recipes_limit'])
-            data = data[:limit]
-
-        return data
-
-
-# Replace standart subscription serializer with one above
-# - This allows for users application to be independent from recipes
-users_serializers.SubscriptionUserSerializer = SubscriptionUserSerializer

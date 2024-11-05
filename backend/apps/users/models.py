@@ -23,11 +23,6 @@ class FoodgramUser(AbstractUser):
         blank=True,
         verbose_name='Аватар',
     )
-    subscriptions = models.ManyToManyField(
-        'FoodgramUser',
-        related_name='subscribers',
-        verbose_name='Подписки на пользователей',
-    )
 
     def __str__(self) -> str:
         return f'{self.username} [{self.email}]'
