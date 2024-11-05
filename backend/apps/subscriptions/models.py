@@ -15,6 +15,7 @@ class UserSubscriptions(models.Model):
     users = models.ManyToManyField(
         User,
         verbose_name='Пользователи',
+        blank=True,
     )
 
     class Meta:
