@@ -5,6 +5,20 @@ from users.models import FoodgramUser
 from users.serializers import UserSerializer
 
 
+def get_is_subscribed(self, user: FoodgramUser) -> bool:
+    if not (request := self.context.get('request')):
+        return False
+    current_user = request.user
+    if current_user.is_anonymous:
+        return False
+    return user in current_user.subscription_list.users.all()
+
+
+UserSerializer.is_subscribed = serializers.SerializerMethodField()
+UserSerializer.Meta.fields += ('is_subscribed',)
+UserSerializer.get_is_subscribed = get_is_subscribed
+
+
 class SubscriptionUserSerializer(UserSerializer):
     recipes = serializers.SerializerMethodField()
     recipes_count = serializers.SerializerMethodField()

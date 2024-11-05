@@ -43,16 +43,7 @@ class UserSerializer(serializers.ModelSerializer):
             'first_name',
             'last_name',
             'avatar',
-            'is_subscribed',
         )
-
-    def get_is_subscribed(self, user: FoodgramUser) -> bool:
-        if request := self.context.get('request', None):
-            current_user = request.user
-            if current_user.is_anonymous:
-                return False
-            return user in current_user.subscription_list.users.all()
-        return False
 
 
 class AvatarSerializer(serializers.ModelSerializer):
