@@ -20,7 +20,7 @@ python-dotenv = "^1.0.1"
 
 
 [tool.poetry.group.testing.dependencies]
-ruff = "^0.7.1"
+ruff = "^0.7.2"
 pytest = "7.1.3"
 pytest-django = "4.5.2"
 pytest-lazy-fixture = "0.6.3"
