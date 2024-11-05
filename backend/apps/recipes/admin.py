@@ -4,7 +4,6 @@ from .models import (
     Ingredient,
     Recipe,
     RecipeIngredient,
-    ShoppingCart,
     Tag,
 )
 
@@ -45,10 +44,3 @@ class RecipeAdmin(admin.ModelAdmin):
     list_filter = ['tags']
     filter_horizontal = ['tags']
     inlines = [RecipeIngredientInline]
-
-
-@admin.register(ShoppingCart)
-class ShoppingCartAdmin(admin.ModelAdmin):
-    list_display = ['user']
-    list_display_links = ['user']
-    filter_horizontal = ['recipes']

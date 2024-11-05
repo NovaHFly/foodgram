@@ -1,4 +1,3 @@
-from annoying.fields import AutoOneToOneField
 from django.contrib.auth import get_user_model
 from django.core.validators import MinValueValidator
 from django.db import models
@@ -130,25 +129,3 @@ class RecipeIngredient(models.Model):
 
     def __str__(self) -> str:
         return f'[{self.recipe.name}] <-> [{self.ingredient.name}]'
-
-
-class ShoppingCart(models.Model):
-    user = AutoOneToOneField(
-        User,
-        related_name='shopping_cart',
-        on_delete=models.CASCADE,
-        verbose_name='Пользователь',
-    )
-    recipes = models.ManyToManyField(
-        Recipe,
-        verbose_name='Рецепты',
-        blank=True,
-    )
-
-    class Meta:
-        verbose_name = 'Корзина'
-        verbose_name_plural = 'Корзины'
-        ordering = ['user__username']
-
-    def __str__(self) -> str:
-        return f'Список покупок {self.user}'

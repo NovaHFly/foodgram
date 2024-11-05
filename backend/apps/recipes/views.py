@@ -1,17 +1,8 @@
-from typing import Callable
-
-from django.db.models import Manager, Model
-from django.http import HttpResponse
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.decorators import action
-from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.permissions import AllowAny
 from rest_framework.request import Request
 from rest_framework.response import Response
-from rest_framework.status import (
-    HTTP_201_CREATED,
-    HTTP_204_NO_CONTENT,
-    HTTP_400_BAD_REQUEST,
-)
 from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
 from short_link.serializers import ShortLinkSerializer
 
@@ -21,10 +12,8 @@ from .permissions import IsAuthorOrReadOnly
 from .serializers import (
     IngredientSerializer,
     RecipeSerializer,
-    ShortRecipeSerializer,
     TagSerializer,
 )
-from .util import generate_shopping_list
 
 
 class IngredientsView(ReadOnlyModelViewSet):
@@ -57,45 +46,6 @@ class RecipesView(ModelViewSet):
     def partial_update(self, request: Request, *args, **kwargs) -> Response:
         return super().update(request, *args, **kwargs)
 
-    def _add_to_list(
-        self,
-        request: Request,
-        get_related_manager: Callable[[Model], Manager],
-    ) -> Response:
-        recipe = self.get_object()
-        current_user = request.user
-
-        related_manager = get_related_manager(current_user)
-
-        if recipe in related_manager.all():
-            return Response(status=HTTP_400_BAD_REQUEST)
-
-        related_manager.add(recipe)
-
-        return Response(
-            ShortRecipeSerializer(
-                recipe,
-                context=self.get_serializer_context(),
-            ).data,
-            status=HTTP_201_CREATED,
-        )
-
-    def _remove_from_list(
-        self,
-        request: Request,
-        get_related_manager: Callable[[Model], Manager],
-    ) -> Response:
-        recipe = self.get_object()
-        current_user = request.user
-
-        related_manager = get_related_manager(current_user)
-
-        if recipe not in related_manager.all():
-            return Response(status=HTTP_400_BAD_REQUEST)
-
-        related_manager.remove(recipe)
-        return Response(status=HTTP_204_NO_CONTENT)
-
     @action(
         detail=True,
         methods=['get'],
@@ -116,34 +66,3 @@ class RecipesView(ModelViewSet):
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(serializer.data)
-
-    @action(
-        detail=False,
-        methods=['get'],
-        permission_classes=[IsAuthenticated],
-    )
-    def download_shopping_cart(self, request: Request) -> HttpResponse:
-        recipes = request.user.shopping_cart.recipes.all()
-        return HttpResponse(
-            generate_shopping_list(recipes),
-            content_type='text/plain; charset=UTF-8',
-        )
-
-    @action(
-        detail=True,
-        methods=['post'],
-        url_path='shopping_cart',
-        permission_classes=[IsAuthenticated],
-    )
-    def add_to_shopping_cart(self, request: Request, pk: int) -> Response:
-        return self._add_to_list(
-            request,
-            lambda user: user.shopping_cart.recipes,
-        )
-
-    @add_to_shopping_cart.mapping.delete
-    def remove_from_shopping_cart(self, request: Request, pk: int) -> Response:
-        return self._remove_from_list(
-            request,
-            lambda user: user.shopping_cart.recipes,
-        )

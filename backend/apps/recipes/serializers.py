@@ -1,11 +1,7 @@
-from typing import Callable
-
-from django.db.models import Manager, Model
 from rest_framework import serializers
 
 from common.serializers import Base64ImageField
 from users import serializers as users_serializers
-from users.models import FoodgramUser
 
 from .models import Ingredient, Recipe, RecipeIngredient, Tag
 from .util import contains_duplicates
@@ -77,7 +73,6 @@ class RecipeSerializer(serializers.ModelSerializer):
         source='recipe_to_ingredient',
     )
     image = Base64ImageField(required=False)
-    is_in_shopping_cart = serializers.SerializerMethodField()
     author = users_serializers.UserSerializer(read_only=True)
 
     class Meta:
@@ -86,7 +81,6 @@ class RecipeSerializer(serializers.ModelSerializer):
             'id',
             'tags',
             'ingredients',
-            'is_in_shopping_cart',
             'name',
             'author',
             'image',
@@ -115,25 +109,6 @@ class RecipeSerializer(serializers.ModelSerializer):
                     'Не загружена картинка рецепта!'
                 )
         return attrs
-
-    def _check_instance_in_user_list(
-        self,
-        recipe: Recipe,
-        get_related_manager: Callable[[Model], Manager],
-    ) -> bool:
-        if not (request := self.context.get('request', None)):
-            return False
-        current_user: FoodgramUser = request.user
-        if current_user.is_anonymous:
-            return False
-        related_manager = get_related_manager(current_user)
-        return recipe in related_manager.all()
-
-    def get_is_in_shopping_cart(self, recipe: Recipe) -> bool:
-        return self._check_instance_in_user_list(
-            recipe,
-            lambda user: user.shopping_cart.recipes,
-        )
 
     def _write(self, validated_data: dict, recipe: Recipe = None) -> Recipe:
         recipe_ingredients = validated_data.pop('recipe_to_ingredient', [])
