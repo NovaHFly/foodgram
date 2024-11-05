@@ -1,10 +1,9 @@
 from typing import Callable
 
 from django.db.models import Manager, Model
-from django.http import HttpResponse, HttpResponseRedirect
-from django.shortcuts import get_object_or_404
+from django.http import HttpResponse
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework.decorators import action, api_view, permission_classes
+from rest_framework.decorators import action
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.request import Request
 from rest_framework.response import Response
@@ -14,14 +13,14 @@ from rest_framework.status import (
     HTTP_400_BAD_REQUEST,
 )
 from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
+from short_link.serializers import ShortLinkSerializer
 
 from .filters import IngredientFilter, RecipeFilter
-from .models import Ingredient, Recipe, ShortLink, Tag
+from .models import Ingredient, Recipe, Tag
 from .permissions import IsAuthorOrReadOnly
 from .serializers import (
     IngredientSerializer,
     RecipeSerializer,
-    ShortLinkSerializer,
     ShortRecipeSerializer,
     TagSerializer,
 )
@@ -120,8 +119,13 @@ class RecipesView(ModelViewSet):
     )
     def get_link(self, request: Request, pk: int) -> Response:
         self.get_object()
+        recipe_path: str = (
+            request.get_raw_uri()
+            .partition('/api/')[-1]
+            .removesuffix('/get-link')
+        )
         serializer = ShortLinkSerializer(
-            data={'recipe_id': pk},
+            data={'full_path': recipe_path},
             context=self.get_serializer_context(),
         )
         serializer.is_valid(raise_exception=True)
@@ -158,10 +162,3 @@ class RecipesView(ModelViewSet):
             request,
             lambda user: user.shopping_cart.recipes,
         )
-
-
-@api_view(['get'])
-@permission_classes([AllowAny])
-def unshorten_link(request: Request, short_url: str) -> HttpResponse:
-    full_url = get_object_or_404(ShortLink, short_url=short_url).full_url
-    return HttpResponseRedirect(full_url)

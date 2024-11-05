@@ -5,7 +5,6 @@ from .models import (
     Recipe,
     RecipeIngredient,
     ShoppingCart,
-    ShortLink,
     Tag,
 )
 
@@ -47,12 +46,6 @@ class RecipeAdmin(admin.ModelAdmin):
     list_filter = ['tags']
     filter_horizontal = ['tags', 'favorited_by_users']
     inlines = [RecipeIngredientInline]
-
-
-@admin.register(ShortLink)
-class ShortLinkAdmin(admin.ModelAdmin):
-    list_display = ['short_url', 'full_url']
-    list_display_links = ['short_url']
 
 
 @admin.register(ShoppingCart)

@@ -4,12 +4,11 @@ from django.db.models import Manager, Model
 from rest_framework import serializers
 
 from common.serializers import Base64ImageField
-from common.util import generate_token
 from users import serializers as users_serializers
 from users.models import FoodgramUser
 
-from .models import Ingredient, Recipe, RecipeIngredient, ShortLink, Tag
-from .util import contains_duplicates, extract_host_with_schema
+from .models import Ingredient, Recipe, RecipeIngredient, Tag
+from .util import contains_duplicates
 
 
 class TagSerializer(serializers.ModelSerializer):
@@ -181,35 +180,3 @@ class RecipeSerializer(serializers.ModelSerializer):
 
     def update(self, instance, validated_data):
         return self._write(validated_data, recipe=instance)
-
-
-class ShortLinkSerializer(serializers.ModelSerializer):
-    recipe_id = serializers.IntegerField()
-
-    class Meta:
-        model = ShortLink
-        fields = ['id', 'recipe_id']
-
-    def to_representation(self, short_link: ShortLink) -> dict[str, str]:
-        url = self.context['request'].get_raw_uri()
-        host_with_schema = extract_host_with_schema(url)
-        return {'short-link': f'{host_with_schema}/s/{short_link.short_url}'}
-
-    def create(self, validated_data: dict) -> ShortLink:
-        url = self.context['request'].get_raw_uri()
-        host_with_schema = extract_host_with_schema(url)
-        full_url = f'{host_with_schema}/recipes/{validated_data["recipe_id"]}/'
-        while True:
-            short_url = generate_token()
-            if not ShortLink.objects.filter(short_url=short_url).exists():
-                break
-
-        if ShortLink.objects.filter(full_url=full_url).exists():
-            return ShortLink.objects.get(full_url=full_url)
-
-        short_link = ShortLink.objects.create(
-            full_url=full_url,
-            short_url=short_url,
-        )
-
-        return short_link

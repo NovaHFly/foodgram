@@ -3,11 +3,13 @@ from django.contrib.auth import get_user_model
 from django.core.validators import MinValueValidator
 from django.db import models
 
-from .const import (
+from common.const import (
     MAX_NAME_LENGTH,
     MAX_SLUG_LENGTH,
+)
+
+from .const import (
     MAX_UNIT_LENGTH,
-    MAX_URL_LENGTH,
 )
 
 User = get_user_model()
@@ -162,24 +164,3 @@ class ShoppingCart(models.Model):
 
     def __str__(self) -> str:
         return f'Список покупок {self.user}'
-
-
-class ShortLink(models.Model):
-    full_url = models.URLField(
-        max_length=MAX_URL_LENGTH,
-        unique=True,
-        verbose_name='Полная ссылка',
-    )
-    short_url = models.CharField(
-        max_length=MAX_SLUG_LENGTH,
-        unique=True,
-        verbose_name='Короткий идентификатор',
-    )
-
-    class Meta:
-        verbose_name = 'Короткая ссылка'
-        verbose_name_plural = 'Короткие ссылки'
-        ordering = ['full_url']
-
-    def __str__(self) -> str:
-        return f'{self.short_url} -> {self.full_url}'
