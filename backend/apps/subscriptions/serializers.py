@@ -14,7 +14,9 @@ def get_is_subscribed(self, user: FoodgramUser) -> bool:
     return user in current_user.subscription_list.users.all()
 
 
-UserSerializer.is_subscribed = serializers.SerializerMethodField()
+UserSerializer._declared_fields['is_subscribed'] = (
+    serializers.SerializerMethodField()
+)
 UserSerializer.Meta.fields += ('is_subscribed',)
 UserSerializer.get_is_subscribed = get_is_subscribed
 

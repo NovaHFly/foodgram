@@ -24,4 +24,4 @@ class UserSubscriptions(models.Model):
         ordering = ['user__username']
 
     def __str__(self) -> str:
-        return f'Список подписок {self.user}'
+        return f'Список подписок {self.user.username}'

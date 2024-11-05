@@ -32,8 +32,6 @@ class CreateUserSerializer(serializers.ModelSerializer):
 
 
 class UserSerializer(serializers.ModelSerializer):
-    is_subscribed = serializers.SerializerMethodField()
-
     class Meta:
         model = FoodgramUser
         fields = (
