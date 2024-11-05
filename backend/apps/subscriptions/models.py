@@ -14,6 +14,7 @@ class UserSubscriptions(models.Model):
     )
     users = models.ManyToManyField(
         User,
+        related_name='subscription_lists',
         verbose_name='Пользователи',
         blank=True,
     )
@@ -24,4 +25,4 @@ class UserSubscriptions(models.Model):
         ordering = ['user__username']
 
     def __str__(self) -> str:
-        return f'Список подписок {self.user.username}'
+        return f'Подписки {self.user.username}'
