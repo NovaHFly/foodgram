@@ -1,7 +1,7 @@
 from rest_framework import serializers
 
 from common.serializers import Base64ImageField
-from users import serializers as users_serializers
+from users.serializers import UserSerializer
 
 from .models import Ingredient, Recipe, RecipeIngredient, Tag
 from .util import contains_duplicates
@@ -73,7 +73,7 @@ class RecipeSerializer(serializers.ModelSerializer):
         source='recipe_to_ingredient',
     )
     image = Base64ImageField(required=False)
-    author = users_serializers.UserSerializer(read_only=True)
+    author = UserSerializer(read_only=True)
 
     class Meta:
         model = Recipe
