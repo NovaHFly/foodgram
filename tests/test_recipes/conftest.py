@@ -20,7 +20,7 @@ RANDOM_NAME_POOL = (
 
 
 @fixture
-def tag():
+def tag() -> Tag:
     return Tag.objects.create(
         name='Some tag',
         slug='some_tag',
@@ -28,7 +28,7 @@ def tag():
 
 
 @fixture
-def create_many_tags():
+def create_many_tags() -> None:
     tags = (
         Tag(
             name=f'{choice(RANDOM_NAME_POOL)}_{i}',
@@ -40,7 +40,7 @@ def create_many_tags():
 
 
 @fixture
-def another_tag():
+def another_tag() -> Tag:
     return Tag.objects.create(
         name='Another tag',
         slug='another_tag',
@@ -48,7 +48,7 @@ def another_tag():
 
 
 @fixture
-def ingredient():
+def ingredient() -> Ingredient:
     return Ingredient.objects.create(
         name='Some ingredient',
         measurement_unit='g',
@@ -56,7 +56,7 @@ def ingredient():
 
 
 @fixture
-def create_many_ingredients():
+def create_many_ingredients() -> None:
     ingredients = (
         Ingredient(
             name=f'{choice(RANDOM_NAME_POOL)}_{i}',
@@ -68,7 +68,7 @@ def create_many_ingredients():
 
 
 @fixture
-def another_ingredient():
+def another_ingredient() -> Ingredient:
     return Ingredient.objects.create(
         name='Another ingredient',
         measurement_unit='ml',
@@ -76,12 +76,12 @@ def another_ingredient():
 
 
 @fixture
-def recipe_image(small_gif):
+def recipe_image(small_gif) -> SimpleUploadedFile:
     return SimpleUploadedFile('small.gif', small_gif, content_type='image/gif')
 
 
 @fixture
-def recipe(author_user, tag, ingredient, recipe_image):
+def recipe(author_user, tag, ingredient, recipe_image) -> Recipe:
     recipe = Recipe.objects.create(
         name='recipe',
         author=author_user,
@@ -103,7 +103,7 @@ def create_many_recipes(
     recipe_image,
     create_many_tags,
     create_many_ingredients,
-):
+) -> None:
     tags = Tag.objects.all()
     ingredients = Ingredient.objects.all()
     for _ in range(15):
@@ -128,42 +128,42 @@ def create_many_recipes(
 
 
 @fixture
-def tag_list_url():
+def tag_list_url() -> str:
     return reverse('tags-list')
 
 
 @fixture
-def tag_detail_url(tag):
+def tag_detail_url(tag) -> str:
     return reverse('tags-detail', kwargs={'pk': tag.id})
 
 
 @fixture
-def ingredient_list_url():
+def ingredient_list_url() -> str:
     return reverse('ingredients-list')
 
 
 @fixture
-def ingredient_detail_url(ingredient):
+def ingredient_detail_url(ingredient) -> str:
     return reverse('ingredients-detail', kwargs={'pk': ingredient.id})
 
 
 @fixture
-def recipe_list_url():
+def recipe_list_url() -> str:
     return reverse('recipes-list')
 
 
 @fixture
-def recipe_detail_url(recipe):
+def recipe_detail_url(recipe) -> str:
     return reverse('recipes-detail', kwargs={'pk': recipe.id})
 
 
 @fixture
-def recipe_get_link_url(recipe):
+def recipe_get_link_url(recipe) -> str:
     return reverse('recipes-get-link', kwargs={'pk': recipe.id})
 
 
 @fixture
-def tag_schema():
+def tag_schema() -> dict:
     return {
         'type': 'object',
         'properties': {
@@ -175,7 +175,7 @@ def tag_schema():
 
 
 @fixture
-def ingredient_schema():
+def ingredient_schema() -> dict:
     return {
         'type': 'object',
         'properties': {
@@ -187,7 +187,11 @@ def ingredient_schema():
 
 
 @fixture
-def recipe_schema(tag_schema, ingredient_schema, user_schema):
+def recipe_schema(
+    tag_schema,
+    ingredient_schema,
+    user_schema,
+) -> dict:
     return {
         'type': 'object',
         'properties': {
@@ -214,7 +218,11 @@ def recipe_schema(tag_schema, ingredient_schema, user_schema):
 
 
 @fixture
-def new_recipe_data(another_tag, another_ingredient, gif_base64):
+def new_recipe_data(
+    another_tag,
+    another_ingredient,
+    gif_base64,
+) -> dict:
     return {
         'tags': [another_tag.id],
         'ingredients': [

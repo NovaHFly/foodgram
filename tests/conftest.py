@@ -13,9 +13,7 @@ NEW_PASSWORD = 'N3wS3cre7P@ssw0rd'
 User = get_user_model()
 
 
-def create_user(
-    username: str,
-) -> tuple[AbstractUser]:
+def create_user(username: str) -> AbstractUser:
     user = User.objects.create(
         username=username,
         email=f'{username}@foodgram.com',
@@ -42,32 +40,32 @@ def setup_media_root():
 
 
 @fixture
-def reader_user():
+def reader_user() -> AbstractUser:
     return create_user('regular')
 
 
 @fixture
-def author_user():
+def author_user() -> AbstractUser:
     return create_user('author')
 
 
 @fixture
-def anon_client():
+def anon_client() -> APIClient:
     return APIClient()
 
 
 @fixture
-def reader_client(reader_user):
+def reader_client(reader_user) -> APIClient:
     return _create_user_client(reader_user)
 
 
 @fixture
-def author_client(author_user):
+def author_client(author_user) -> APIClient:
     return _create_user_client(author_user)
 
 
 @fixture
-def user_schema():
+def user_schema() -> dict:
     return {
         'type': 'object',
         'properties': {
@@ -82,7 +80,20 @@ def user_schema():
 
 
 @fixture
-def small_gif():
+def short_recipe_schema() -> dict:
+    {
+        'type': 'object',
+        'properties': {
+            'id': {'type': 'number'},
+            'name': {'type': 'string'},
+            'image': {'type': 'string'},
+            'cooking_time': {'type': 'number'},
+        },
+    }
+
+
+@fixture
+def small_gif() -> bytes:
     return (
         b'\x47\x49\x46\x38\x39\x61\x01\x00\x01\x00\x00\x00\x00\x21\xf9\x04'
         b'\x01\x0a\x00\x01\x00\x2c\x00\x00\x00\x00\x01\x00\x01\x00\x00\x02'
@@ -91,7 +102,7 @@ def small_gif():
 
 
 @fixture
-def gif_base64():
+def gif_base64() -> str:
     return (
         'data:image/gif;base64,'
         'R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw=='
@@ -99,7 +110,7 @@ def gif_base64():
 
 
 @fixture
-def another_gif_base64():
+def another_gif_base64() -> str:
     return (
         'data:image/gif;base64,'
         'R0lGODlhAQABAIAAAAUEBAAAACwAAAAAAQABAAACAkQBADs='
