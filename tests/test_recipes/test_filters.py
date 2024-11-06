@@ -6,7 +6,7 @@ from recipes.models import Tag
 
 from .conftest import RANDOM_NAME_POOL
 
-pytestmark = mark.depends(on=['endpoints_valid'])
+pytestmark = mark.depends(on=['endpoints_valid', 'recipe_list_valid_response'])
 
 
 @mark.usefixtures('create_many_ingredients')
