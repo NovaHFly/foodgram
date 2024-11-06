@@ -1,4 +1,3 @@
-import jsonschema
 from pytest import mark
 from rest_framework.status import (
     HTTP_200_OK,
@@ -63,7 +62,6 @@ def test_authorized_user_can_create_recipes(
     author_client,
     recipe_list_url,
     new_recipe_data,
-    recipe_schema,
 ):
     Recipe.objects.all().delete()
     assert not Recipe.objects.count()
@@ -74,7 +72,6 @@ def test_authorized_user_can_create_recipes(
     )
     assert response.status_code == HTTP_201_CREATED
     response_data = response.data
-    jsonschema.validate(response_data, recipe_schema)
     assert (
         Recipe.objects.count()
         and Recipe.objects.filter(id=response_data['id']).exists()

@@ -2,7 +2,7 @@ from django.conf import settings
 from pytest import mark
 
 pytestmark = [
-    mark.depends(on=['endpoints_valid']),
+    mark.depends(on='recipes_endpoints_valid'),
     mark.usefixtures('create_many_recipes'),
 ]
 

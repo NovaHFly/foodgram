@@ -2,7 +2,7 @@ from pytest import lazy_fixture as lf, mark
 
 from recipes.models import Recipe
 
-pytestmark = mark.depends(on=['endpoints_valid'])
+pytestmark = mark.depends(on=['recipes_endpoints_valid'])
 
 
 @mark.parametrize(

@@ -4,9 +4,9 @@ from pytest import mark
 
 from recipes.models import Tag
 
-from .conftest import RANDOM_NAME_POOL
+from ..conftest import RANDOM_NAME_POOL
 
-pytestmark = mark.depends(on=['endpoints_valid'])
+pytestmark = mark.depends(on=['recipes_endpoints_valid'])
 
 
 @mark.usefixtures('create_many_ingredients')

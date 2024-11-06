@@ -4,7 +4,7 @@ from rest_framework.status import (
     HTTP_200_OK,
 )
 
-pytestmark = mark.depends(name='endpoints_valid')
+pytestmark = mark.depends(name='recipes_endpoints_valid')
 
 
 @mark.parametrize(
