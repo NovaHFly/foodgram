@@ -26,7 +26,7 @@ pytestmark = mark.depends(name='recipes_endpoints_valid')
         (lf('reader_client'), lf('recipe_get_link_url')),
     ),
 )
-def test_endpoints_available(client, url):
+def test_recipes_endpoints_available(client, url):
     assert client.get(url).status_code == HTTP_200_OK
 
 
@@ -50,7 +50,7 @@ def test_endpoints_available(client, url):
         ),
     ],
 )
-def test_response_schema(client, url, schema):
+def test_recipes_response_schema(client, url, schema):
     response = client.get(url)
     jsonschema.validate(response.data, schema)
 

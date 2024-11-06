@@ -1,10 +1,10 @@
 from rest_framework import serializers
 
 from common.serializers import Base64ImageField
+from common.util import contains_duplicates
 from users.serializers import UserSerializer
 
 from .models import Ingredient, Recipe, RecipeIngredient, Tag
-from .util import contains_duplicates
 
 
 class TagSerializer(serializers.ModelSerializer):
