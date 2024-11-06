@@ -1,5 +1,6 @@
 .venv
-.ruff_cache
+.*_cache
 db.sqlite3
 __pycache__
 media
+requirements.*.txt
