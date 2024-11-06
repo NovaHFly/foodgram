@@ -53,3 +53,16 @@ def test_endpoints_available(client, url):
 def test_response_schema(client, url, schema):
     response = client.get(url)
     jsonschema.validate(response.data, schema)
+
+
+def test_recipe_list_response_valid_structure(reader_client, recipe_list_url):
+    response = reader_client.get(recipe_list_url)
+    assert all(
+        key in response.data
+        for key in (
+            'count',
+            'next',
+            'previous',
+            'results',
+        )
+    )
