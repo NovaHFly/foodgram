@@ -1,4 +1,4 @@
-![Main workflow](https://github.com/NovaHFly/foodgram/actions/workflows/main.yaml/badge.svg)
+![Main workflow](https://github.com/NovaHFly/foodgram/actions/workflows/main.yml/badge.svg)
 
 # Foodgram
 
