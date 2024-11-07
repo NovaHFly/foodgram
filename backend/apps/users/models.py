@@ -24,6 +24,9 @@ class FoodgramUser(AbstractUser):
         verbose_name='Аватар',
     )
 
+    USERNAME_FIELD = 'email'
+    REQUIRED_FIELDS = ['first_name', 'last_name']
+
     def __str__(self) -> str:
         return f'{self.username} [{self.email}]'
 

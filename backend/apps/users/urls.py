@@ -1,9 +1,12 @@
+from django.urls import include, path
 from rest_framework.routers import SimpleRouter
 
-from users.views import AuthView, UsersView
+from .views import UsersView
 
 router = SimpleRouter()
-router.register('auth/token', AuthView, basename='auth')
-router.register('users', UsersView, basename='users')
+router.register('users', UsersView, basename='avatar')
 
-urlpatterns = router.urls
+urlpatterns = [
+    path('', include(router.urls)),
+    path('auth/', include('djoser.urls.authtoken')),
+]
