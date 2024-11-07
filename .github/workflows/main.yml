@@ -5,8 +5,16 @@ jobs:
 
   test_backend:
     runs-on: ubuntu-latest
-    # strategy
-    #   matrix:
+    strategy:
+      matrix:
+        python-version: ["3.9", "3.10", "3.11"]
+
+    env:
+      POSTGRES_USER: django_user
+      POSTGRES_PASSWORD: django_password
+      POSTGRES_DB: django_db
+      DB_HOST: 127.0.0.1
+      DB_PORT: 5432
 
     services:
       postgres:
@@ -43,6 +51,10 @@ jobs:
           DB_PORT: 5432
         run: |
           ruff check
+
+      - name: Pytest testing
+        run: |
+          pytest
 
   get_changed_images:
     runs-on: ubuntu-latest
