@@ -1,7 +1,7 @@
 import shutil
 import tempfile
 from datetime import datetime, timedelta
-from random import choice, randint
+from random import choice, choices, randint
 
 from django.conf import settings
 from django.contrib.auth import get_user_model
@@ -13,40 +13,14 @@ from rest_framework.test import APIClient
 
 from recipes.models import Ingredient, Recipe, Tag
 
-PASSWORD = 'S3cre7P@ssw0rd'
-NEW_PASSWORD = 'N3wS3cre7P@ssw0rd'
-
-RANDOM_NAME_POOL = (
-    'test',
-    'another',
-    'hello',
-    'cat',
-    'many',
-    'job',
-    'dog',
-    'carrot',
+from .const import (
+    NEW_PASSWORD,
+    PASSWORD,
+    RANDOM_NAME_POOL,
 )
+from .util import create_recipe, create_user, create_user_client
 
 User = get_user_model()
-
-
-def _create_user(username: str) -> AbstractUser:
-    user = User.objects.create(
-        username=username,
-        email=f'{username}@foodgram.com',
-        first_name=username,
-        last_name='user',
-    )
-    user.set_password(PASSWORD)
-    user.save()
-    return user
-
-
-def _create_user_client(user: AbstractUser) -> APIClient:
-    client = APIClient()
-    client.force_authenticate(user)
-    client.user = user
-    return client
 
 
 @fixture(scope='session', autouse=True)
@@ -82,13 +56,18 @@ def another_gif_base64() -> str:
 
 
 @fixture
-def reader_user() -> AbstractUser:
-    return _create_user('regular')
+def some_image(small_gif) -> SimpleUploadedFile:
+    return SimpleUploadedFile('small.gif', small_gif, content_type='image/gif')
+
+
+@fixture
+def reader_user(some_image) -> AbstractUser:
+    return create_user('reader', avatar=some_image)
 
 
 @fixture
 def author_user() -> AbstractUser:
-    return _create_user('author')
+    return create_user('author')
 
 
 @fixture
@@ -98,17 +77,12 @@ def anon_client() -> APIClient:
 
 @fixture
 def reader_client(reader_user) -> APIClient:
-    return _create_user_client(reader_user)
+    return create_user_client(reader_user)
 
 
 @fixture
 def author_client(author_user) -> APIClient:
-    return _create_user_client(author_user)
-
-
-@fixture
-def some_image(small_gif) -> SimpleUploadedFile:
-    return SimpleUploadedFile('small.gif', small_gif, content_type='image/gif')
+    return create_user_client(author_user)
 
 
 @fixture
@@ -169,18 +143,17 @@ def create_many_ingredients() -> None:
 
 @fixture
 def recipe(author_user, tag, ingredient, some_image) -> Recipe:
-    recipe = Recipe.objects.create(
-        name='recipe',
-        author=author_user,
-        cooking_time=1,
-        text='Lorem ipsum',
-        image=some_image,
+    return create_recipe(
+        {
+            'name': 'recipe',
+            'author': author_user,
+            'cooking_time': 1,
+            'text': 'Lorem ipsum',
+            'image': some_image,
+        },
+        [tag],
+        [(ingredient, 1)],
     )
-    recipe.tags.add(tag)
-    recipe.ingredients.add(ingredient, through_defaults={'amount': 1})
-    recipe.save()
-
-    return recipe
 
 
 @fixture
@@ -193,25 +166,24 @@ def create_many_recipes(
 ) -> None:
     tags = Tag.objects.all()
     ingredients = Ingredient.objects.all()
+
     for _ in range(15):
-        recipe = Recipe.objects.create(
-            name=f'{choice(RANDOM_NAME_POOL)}_{randint(1, 50)}',
-            author=choice([author_user, reader_user]),
-            cooking_time=randint(1, 50),
-            text='Lorem ipsum',
-            image=some_image,
-            pub_date=datetime.now() - timedelta(randint(0, 50)),
+        recipe_tags = set(choices(tags, k=randint(1, 5)))
+        recipe_ingredients = set(choices(ingredients, k=randint(1, 5)))
+        ingredient_amounts = (50 for _ in range(len(recipe_ingredients)))
+        ingredients_with_amounts = zip(recipe_ingredients, ingredient_amounts)
+        create_recipe(
+            {
+                'name': f'{choice(RANDOM_NAME_POOL)}_{randint(1, 50)}',
+                'author': choice([author_user, reader_user]),
+                'cooking_time': randint(1, 50),
+                'text': 'Lorem ipsum',
+                'image': some_image,
+                'pub_date': datetime.now() - timedelta(randint(0, 50)),
+            },
+            recipe_tags,
+            ingredients_with_amounts,
         )
-        for _ in range(randint(1, 5)):
-            recipe.tags.add(choice(tags))
-        for _ in range(randint(1, 5)):
-            recipe.ingredients.add(
-                choice(ingredients),
-                through_defaults={
-                    'amount': randint(1, 50),
-                },
-            )
-        recipe.save()
 
 
 @fixture
@@ -233,6 +205,38 @@ def new_recipe_data(
 
 
 @fixture
+def new_user_data() -> dict[str, str]:
+    return {
+        'email': 'new_user@user.com',
+        'username': 'new_user',
+        'first_name': 'New',
+        'last_name': 'user',
+        'password': PASSWORD,
+    }
+
+
+@fixture
+def change_password_data() -> dict[str, str]:
+    return {
+        'current_password': PASSWORD,
+        'new_password': NEW_PASSWORD,
+    }
+
+
+@fixture
+def new_avatar_data(another_gif_base64) -> dict[str, str]:
+    return {'avatar': another_gif_base64}
+
+
+@fixture
+def reader_login_data(reader_user) -> dict[str, str]:
+    return {
+        'email': reader_user.email,
+        'password': PASSWORD,
+    }
+
+
+@fixture
 def subscribe_reader_to_author(
     reader_user,
     author_user,
@@ -243,8 +247,67 @@ def subscribe_reader_to_author(
 @fixture
 def add_many_subscriptions(reader_user):
     for i in range(15):
-        user = _create_user(f'user {i}')
+        user = create_user(f'user {i}')
         reader_user.subscription_list.users.add(user)
+
+
+@fixture
+def add_recipe_to_reader_favorites(reader_user, recipe):
+    reader_user.favorites_list.recipes.add(recipe)
+
+
+@fixture
+def add_random_recipes_to_reader_favorites(reader_user, create_many_recipes):
+    recipes = set(choices(Recipe.objects.all(), k=7))
+    for recipe in recipes:
+        reader_user.favorites_list.recipes.add(recipe)
+
+
+@fixture
+def add_recipe_to_reader_shopping_cart(reader_user, recipe):
+    reader_user.shopping_cart.recipes.add(recipe)
+
+
+@fixture
+def add_random_recipes_to_reader_shopping_cart(
+    reader_user,
+    create_many_recipes,
+):
+    recipes = set(choices(Recipe.objects.all(), k=7))
+    for recipe in recipes:
+        reader_user.shopping_cart.recipes.add(recipe)
+
+
+@fixture
+def create_recipes_with_overlapping_ingredients(
+    tag,
+    author_user,
+    some_image,
+    create_many_ingredients,
+):
+    ingredients = Ingredient.objects.all()[:5]
+
+    for _ in range(15):
+        recipe_ingredients = set(choices(ingredients, k=randint(1, 3)))
+        ingredient_amounts = (50 for _ in range(len(recipe_ingredients)))
+        ingredients_with_amounts = zip(recipe_ingredients, ingredient_amounts)
+        create_recipe(
+            {
+                'name': f'{choice(RANDOM_NAME_POOL)}_{randint(1, 50)}',
+                'author': author_user,
+                'cooking_time': 1,
+                'text': 'Lorem ipsum',
+                'image': some_image,
+            },
+            [tag],
+            ingredients_with_amounts,
+        )
+
+
+@fixture
+def add_all_recipes_to_reader_shopping_cart(reader_user):
+    for recipe in Recipe.objects.all():
+        reader_user.shopping_cart.recipes.add(recipe)
 
 
 @fixture
@@ -271,6 +334,11 @@ def tag_detail_url(tag) -> str:
 
 
 @fixture
+def nonexistant_tag_url() -> str:
+    return reverse('tags-detail', kwargs={'pk': 1000})
+
+
+@fixture
 def ingredient_list_url() -> str:
     return reverse('ingredients-list')
 
@@ -278,6 +346,11 @@ def ingredient_list_url() -> str:
 @fixture
 def ingredient_detail_url(ingredient) -> str:
     return reverse('ingredients-detail', kwargs={'pk': ingredient.id})
+
+
+@fixture
+def nonexistant_ingredient_url() -> str:
+    return reverse('ingredients-detail', kwargs={'pk': 1000})
 
 
 @fixture
@@ -291,23 +364,83 @@ def recipe_detail_url(recipe) -> str:
 
 
 @fixture
+def nonexistant_recipe_url() -> str:
+    return reverse('recipes-detail', kwargs={'pk': 1000})
+
+
+@fixture
+def recipe_favorite_url(recipe) -> str:
+    return reverse('recipes-favorite', kwargs={'pk': recipe.id})
+
+
+@fixture
+def nonexistant_recipe_favorite_url() -> str:
+    return reverse('recipes-favorite', kwargs={'pk': 1000})
+
+
+@fixture
+def recipe_shopping_cart_url(recipe) -> str:
+    return reverse('recipes-shopping-cart', kwargs={'pk': recipe.id})
+
+
+@fixture
+def nonexistant_recipe_shopping_cart_url() -> str:
+    return reverse('recipes-shopping-cart', kwargs={'pk': 1000})
+
+
+@fixture
 def recipe_get_link_url(recipe) -> str:
     return reverse('recipes-get-link', kwargs={'pk': recipe.id})
 
 
 @fixture
+def nonexistant_recipe_short_link_url() -> str:
+    return reverse('recipes-get-link', kwargs={'pk': 1000})
+
+
+@fixture
+def download_shopping_cart_url() -> str:
+    return reverse('recipes-download-shopping-cart')
+
+
+@fixture
+def users_list_url() -> str:
+    return reverse('users-list')
+
+
+@fixture
+def author_user_url(author_user) -> str:
+    return reverse('users-detail', kwargs={'id': author_user.id})
+
+
+@fixture
+def current_user_url() -> str:
+    return reverse('users-me')
+
+
+@fixture
+def avatar_url() -> str:
+    return reverse('users-avatar')
+
+
+@fixture
 def subscription_list_url() -> str:
-    return reverse('subscriptions-subscriptions')
+    return reverse('users-subscriptions')
 
 
 @fixture
 def subscribe_to_reader_url(reader_user) -> str:
-    return reverse('subscriptions-subscribe', kwargs={'pk': reader_user.id})
+    return reverse('users-subscribe', kwargs={'pk': reader_user.id})
 
 
 @fixture
 def subscribe_to_author_url(author_user) -> str:
-    return reverse('subscriptions-subscribe', kwargs={'pk': author_user.id})
+    return reverse('users-subscribe', kwargs={'pk': author_user.id})
+
+
+@fixture
+def nonexistant_user_subscribe_url() -> str:
+    return reverse('users-subscribe', kwargs={'pk': 1000})
 
 
 @fixture
@@ -376,6 +509,20 @@ def user_schema() -> dict:
             'first_name': {'type': 'string'},
             'last_name': {'type': 'string'},
             'avatar': {'type': ['string', 'null']},
+        },
+    }
+
+
+@fixture
+def user_register_confirmation_schema() -> dict:
+    return {
+        'type': 'object',
+        'properties': {
+            'id': {'type': 'number'},
+            'email': {'type': 'string'},
+            'username': {'type': 'string'},
+            'first_name': {'type': 'string'},
+            'last_name': {'type': 'string'},
         },
     }
 
