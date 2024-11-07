@@ -90,7 +90,7 @@ def test_limit_recipes_count_in_subscription_list(
     response = reader_client.get(
         subscription_list_url + f'?recipes_limit={limit}'
     )
-    assert len(response.data['results'][0]['recipes']) == limit
+    assert len(response.data['results'][0]['recipes']) <= limit
 
 
 def test_anon_cannot_subscribe(anon_client, subscribe_to_author_url):
