@@ -6,6 +6,7 @@ from rest_framework.status import (
     HTTP_401_UNAUTHORIZED,
 )
 
+from .const import NEW_AVATAR_DATA, USER_SCHEMA
 from .util import check_response_is_paginated
 
 
@@ -31,17 +32,16 @@ def test_users_list_response_valid_structure(reader_client, users_list_url):
 def test_user_response_schema_is_valid(
     reader_client,
     author_user_url,
-    user_schema,
 ):
-    jsonschema.validate(reader_client.get(author_user_url).data, user_schema)
+    jsonschema.validate(reader_client.get(author_user_url).data, USER_SCHEMA)
 
 
-def test_can_add_avatar(reader_client, avatar_url, new_avatar_data):
+def test_can_add_avatar(reader_client, avatar_url):
     old_avatar = reader_client.user.avatar
     assert (
         reader_client.put(
             avatar_url,
-            data=new_avatar_data,
+            data=NEW_AVATAR_DATA,
             format='json',
         ).status_code
         == HTTP_200_OK
@@ -58,11 +58,12 @@ def test_can_delete_avatar(reader_client, avatar_url):
 
 
 def test_anon_cannot_access_avatar_endpoints(
-    anon_client, avatar_url, new_avatar_data
+    anon_client,
+    avatar_url,
 ):
     assert (
         anon_client.put(
-            avatar_url, data=new_avatar_data, format='json'
+            avatar_url, data=NEW_AVATAR_DATA, format='json'
         ).status_code
         == HTTP_401_UNAUTHORIZED
     )

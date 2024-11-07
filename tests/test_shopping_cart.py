@@ -13,16 +13,18 @@ from rest_framework.status import (
 
 from common.util import contains_duplicates
 
-from .const import SHOPPING_LIST_REGEX
+from .const import SHOPPING_LIST_REGEX, SHORT_RECIPE_SCHEMA
 from .util import parse_shopping_list
 
 
 def test_can_add_recipe_to_cart(
-    reader_client, recipe_shopping_cart_url, recipe, short_recipe_schema
+    reader_client,
+    recipe_shopping_cart_url,
+    recipe,
 ):
     response = reader_client.post(recipe_shopping_cart_url)
     assert response.status_code == HTTP_201_CREATED
-    jsonschema.validate(response.data, short_recipe_schema)
+    jsonschema.validate(response.data, SHORT_RECIPE_SCHEMA)
     assert recipe in reader_client.user.shopping_cart.recipes.all()
 
 

@@ -16,6 +16,7 @@ from rest_framework.status import (
 from recipes.models import Recipe, Tag
 
 from .conftest import RANDOM_NAME_POOL
+from .const import INGREDIENT_SCHEMA, RECIPE_SCHEMA, TAG_SCHEMA
 from .util import (
     check_different_pages,
     check_recipe_is_the_same,
@@ -53,17 +54,17 @@ def test_recipes_endpoints_available(client, url):
         (
             lf('reader_client'),
             lf('tag_detail_url'),
-            lf('tag_schema'),
+            TAG_SCHEMA,
         ),
         (
             lf('reader_client'),
             lf('ingredient_detail_url'),
-            lf('ingredient_schema'),
+            INGREDIENT_SCHEMA,
         ),
         (
             lf('reader_client'),
             lf('recipe_detail_url'),
-            lf('recipe_schema'),
+            RECIPE_SCHEMA,
         ),
     ],
 )
@@ -107,9 +108,12 @@ def test_recipe_list_page_size(
 
 @mark.usefixtures('create_many_recipes')
 def test_recipe_ordering(reader_client, recipe_list_url):
-    data = reader_client.get(recipe_list_url + '?limit=50').data['results']
+    response_data = reader_client.get(recipe_list_url + '?limit=50').data[
+        'results'
+    ]
     pub_dates = [
-        Recipe.objects.get(id=recipe['id']).pub_date for recipe in data
+        Recipe.objects.get(id=recipe['id']).pub_date
+        for recipe in response_data
     ]
     assert sorted(pub_dates, reverse=True) == pub_dates
 
@@ -117,17 +121,21 @@ def test_recipe_ordering(reader_client, recipe_list_url):
 @mark.usefixtures('create_many_ingredients')
 def test_filter_ingredient_by_name(reader_client, ingredient_list_url):
     query = choice(RANDOM_NAME_POOL).lower()
-    data = reader_client.get(ingredient_list_url + f'?name={query}').data
-    assert all(query in ingredient['name'].lower() for ingredient in data)
+    response_data = reader_client.get(
+        ingredient_list_url + f'?name={query}'
+    ).data
+    assert all(
+        query in ingredient['name'].lower() for ingredient in response_data
+    )
 
 
 @mark.usefixtures('create_many_recipes')
 def test_filter_recipe_by_author(reader_client, recipe_list_url):
     query = reader_client.user.id
-    data = reader_client.get(
+    response_data = reader_client.get(
         recipe_list_url + f'?author={query}',
     ).data['results']
-    assert all(recipe['author']['id'] == query for recipe in data)
+    assert all(recipe['author']['id'] == query for recipe in response_data)
 
 
 @mark.usefixtures('create_many_recipes')

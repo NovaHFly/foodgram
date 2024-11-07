@@ -10,13 +10,17 @@ from rest_framework.status import (
 
 from common.util import contains_duplicates
 
+from .const import SHORT_RECIPE_SCHEMA
+
 
 def test_can_add_recipe_to_favorites(
-    reader_client, recipe_favorite_url, recipe, short_recipe_schema
+    reader_client,
+    recipe_favorite_url,
+    recipe,
 ):
     response = reader_client.post(recipe_favorite_url)
     assert response.status_code == HTTP_201_CREATED
-    jsonschema.validate(response.data, short_recipe_schema)
+    jsonschema.validate(response.data, SHORT_RECIPE_SCHEMA)
     assert recipe in reader_client.user.favorites_list.recipes.all()
 
 

@@ -11,7 +11,7 @@ from rest_framework.test import APIClient
 from common.util import contains_duplicates
 from recipes.models import Ingredient, Recipe, Tag
 
-from .const import PASSWORD, SHOPPING_LIST_REGEX
+from .const import SHOPPING_LIST_REGEX
 
 User = get_user_model()
 
@@ -19,16 +19,13 @@ User = get_user_model()
 def create_user(
     username: str, avatar: Optional[SimpleUploadedFile] = None
 ) -> AbstractUser:
-    user = User.objects.create(
+    return User.objects.create(
         username=username,
         email=f'{username}@foodgram.com',
         first_name=username,
         last_name='user',
         avatar=avatar,
     )
-    user.set_password(PASSWORD)
-    user.save()
-    return user
 
 
 def create_user_client(user: AbstractUser) -> APIClient:

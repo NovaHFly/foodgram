@@ -10,6 +10,7 @@ from rest_framework.status import (
     HTTP_404_NOT_FOUND,
 )
 
+from .const import SUBSCRIPTION_USER_SCHEMA
 from .util import check_different_pages, check_response_is_paginated
 
 
@@ -72,11 +73,10 @@ def test_subscription_list_page_size(
 def test_subscription_user_schema_valid(
     reader_client,
     subscription_list_url,
-    subscription_user_schema,
 ):
     jsonschema.validate(
         reader_client.get(subscription_list_url).data['results'][0],
-        subscription_user_schema,
+        SUBSCRIPTION_USER_SCHEMA,
     )
 
 
@@ -93,16 +93,16 @@ def test_limit_recipes_count_in_subscription_list(
     assert len(response.data['results'][0]['recipes']) <= limit
 
 
-def test_anon_cannot_subscribe(anon_client, subscribe_to_author_url):
+def test_anon_cannot_subscribe(anon_client, author_subscribe_url):
     assert (
-        anon_client.post(subscribe_to_author_url).status_code
+        anon_client.post(author_subscribe_url).status_code
         == HTTP_401_UNAUTHORIZED
     )
 
 
-def test_anon_cannot_unsubscribe(anon_client, subscribe_to_author_url):
+def test_anon_cannot_unsubscribe(anon_client, author_subscribe_url):
     assert (
-        anon_client.delete(subscribe_to_author_url).status_code
+        anon_client.delete(author_subscribe_url).status_code
         == HTTP_401_UNAUTHORIZED
     )
 
@@ -110,9 +110,9 @@ def test_anon_cannot_unsubscribe(anon_client, subscribe_to_author_url):
 def test_user_can_subscribe_to_someone(
     reader_client,
     author_user,
-    subscribe_to_author_url,
+    author_subscribe_url,
 ):
-    response = reader_client.post(subscribe_to_author_url)
+    response = reader_client.post(author_subscribe_url)
     assert response.status_code == HTTP_201_CREATED
     assert author_user in reader_client.user.subscription_list.users.all()
 
@@ -121,18 +121,18 @@ def test_user_can_subscribe_to_someone(
 def test_user_can_unsubscribe_from_someone(
     reader_client,
     author_user,
-    subscribe_to_author_url,
+    author_subscribe_url,
 ):
-    response = reader_client.delete(subscribe_to_author_url)
+    response = reader_client.delete(author_subscribe_url)
     assert response.status_code == HTTP_204_NO_CONTENT
     assert author_user not in reader_client.user.subscription_list.users.all()
 
 
 def test_user_cannot_subscribe_to_themselves(
     reader_client,
-    subscribe_to_reader_url,
+    reader_subscribe_url,
 ):
-    response = reader_client.post(subscribe_to_reader_url)
+    response = reader_client.post(reader_subscribe_url)
     assert response.status_code == HTTP_400_BAD_REQUEST
     assert (
         reader_client.user
@@ -143,20 +143,20 @@ def test_user_cannot_subscribe_to_themselves(
 @mark.usefixtures('subscribe_reader_to_author')
 def test_user_cannot_subscribe_twice(
     reader_client,
-    subscribe_to_author_url,
+    author_subscribe_url,
 ):
     assert reader_client.user.subscription_list.users.count() == 1
-    response = reader_client.post(subscribe_to_author_url)
+    response = reader_client.post(author_subscribe_url)
     assert response.status_code == HTTP_400_BAD_REQUEST
     assert reader_client.user.subscription_list.users.count() == 1
 
 
 def test_user_cannot_unsubscribe_when_not_subscribed(
     reader_client,
-    subscribe_to_author_url,
+    author_subscribe_url,
 ):
     assert reader_client.user.subscription_list.users.count() == 0
-    response = reader_client.delete(subscribe_to_author_url)
+    response = reader_client.delete(author_subscribe_url)
     assert response.status_code == HTTP_400_BAD_REQUEST
     assert reader_client.user.subscription_list.users.count() == 0
 
