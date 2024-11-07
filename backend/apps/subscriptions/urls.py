@@ -6,7 +6,7 @@ router = SimpleRouter()
 router.register(
     'users',
     SubscriptionsView,
-    basename='subscriptions',
+    basename='users',
 )
 
 urlpatterns = router.urls

@@ -6,7 +6,7 @@ router = SimpleRouter()
 router.register(
     'recipes',
     FavoriteRecipesView,
-    basename='favorites',
+    basename='recipes',
 )
 
 urlpatterns = router.urls
