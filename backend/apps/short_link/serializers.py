@@ -16,7 +16,9 @@ class ShortLinkSerializer(serializers.ModelSerializer):
     def to_representation(self, short_link: ShortLink) -> dict[str, str]:
         url = self.context['request'].get_raw_uri()
         host_with_schema = extract_host_with_schema(url)
-        return {'short-link': f'{host_with_schema}/s/{short_link.short_token}'}
+        return {
+            'short-link': f'{host_with_schema}/s/{short_link.short_token}/'
+        }
 
     def create(self, validated_data: dict) -> ShortLink:
         full_path = validated_data.pop('full_path')

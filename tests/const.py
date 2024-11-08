@@ -12,6 +12,8 @@ RANDOM_NAME_POOL = (
 )
 
 SHOPPING_LIST_REGEX = r'(.+) \((\d+)\)'
+SHORT_LINK_REGEX = r'https?:\/\/.+\/s\/(.+)\/'
+RECIPE_PATH_REGEX = r'recipes\/[0-9]+'
 
 SMALL_GIF = (
     b'\x47\x49\x46\x38\x39\x61\x01\x00\x01\x00\x00\x00\x00\x21\xf9\x04'

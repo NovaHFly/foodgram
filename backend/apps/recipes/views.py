@@ -57,7 +57,7 @@ class RecipesView(ModelViewSet):
         recipe_path: str = (
             request.get_raw_uri()
             .partition('/api/')[-1]
-            .removesuffix('/get-link')
+            .partition('get-link')[0]
         )
         serializer = ShortLinkSerializer(
             data={'full_path': recipe_path},
