@@ -8,7 +8,6 @@ preview = true
 
 [lint.extend-per-file-ignores]
 "settings.py" = ["E501"]
-"manage.py" = ["E501"]
 
 [lint.isort]
 combine-as-imports = true
